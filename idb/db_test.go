@@ -11,7 +11,7 @@ import (
 	"syscall/js"
 	"testing"
 
-	"github.com/hack-pad/go-indexeddb/idb/internal/assert"
+	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
 )
 
 func testDB(tb testing.TB, initFunc func(*Database)) *Database {

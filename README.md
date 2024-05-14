@@ -1,17 +1,58 @@
-# go-indexeddb    [![Go Reference](https://pkg.go.dev/badge/github.com/hack-pad/go-indexeddb/idb.svg)][reference] [![CI](https://github.com/hack-pad/go-indexeddb/actions/workflows/ci.yml/badge.svg)](https://github.com/hack-pad/go-indexeddb/actions/workflows/ci.yml) [![Coverage Status](https://coveralls.io/repos/github/hack-pad/go-indexeddb/badge.svg?branch=main)](https://coveralls.io/github/hack-pad/go-indexeddb?branch=main)
+# go-indexeddb
 
-An IndexedDB driver with bindings for Go code compiled to WebAssembly.
+[![Go Reference][reference-badge]][reference]
+[![CI][ci-badge]][ci-workflow]
 
-Package `idb` is a low-level Go driver that provides type-safe bindings to IndexedDB in Wasm programs.
-The primary focus is to align with the IndexedDB spec, followed by ease of use.
+[reference-badge]: https://pkg.go.dev/badge/github.com/aperturerobotics/go-indexeddb/idb.svg
+[ci-badge]: https://github.com/aperturerobotics/go-indexeddb/actions/workflows/tests.yml/badge.svg
+[reference]: https://pkg.go.dev/github.com/aperturerobotics/go-indexeddb/idb
+[ci-workflow]: https://github.com/aperturerobotics/go-indexeddb/actions/workflows/tests.yml
 
-To get started, get the global indexedDB instance with idb.Global(). See the [reference][] for examples and full documentation.
+**go-indexeddb** is a low-level Go driver that provides type-safe bindings to IndexedDB in Wasm programs. The primary focus is to align with the IndexedDB spec, followed by ease of use.
 
-```bash
-go get github.com/hack-pad/go-indexeddb@latest
-```
-```go
-import "github.com/hack-pad/go-indexeddb/idb"
-```
+[IndexedDB][] is a transactional database system, like an SQL-based RDBMS. However, unlike SQL-based RDBMSes, which use fixed-column tables, IndexedDB is an object-oriented database. IndexedDB lets you store and retrieve objects that are indexed with a key; any objects supported by the structured clone algorithm can be stored.
 
-[reference]: https://pkg.go.dev/github.com/hack-pad/go-indexeddb/idb
+[IndexedDB]: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+
+See the [reference][] for full documentation and examples.
+
+
+This package is available at **github.com/aperturerobotics/go-indexeddb**.
+
+## Package index
+
+Summary of the packages provided by this module:
+
+- [`idb`][idb-pkg]: Package `idb` provides a low-level Go driver with type-safe bindings to IndexedDB in Wasm programs.
+
+[idb-pkg]: https://pkg.go.dev/github.com/hack-pad/go-indexeddb/idb
+
+## Usage
+
+1. Get the package:
+
+   ```bash
+   go get github.com/aperturerobotics/go-indexeddb@latest
+   ```
+
+2. Import it in your code:
+
+   ```go
+   import "github.com/aperturerobotics/go-indexeddb/idb"
+   ```
+
+3. To get started, get the global indexedDB instance:
+
+   ```go
+   db, err := idb.Global().Open(ctx, "MyDatabase", nil)
+   ```
+
+Check out the [reference][] for more details and examples!
+
+## Upstream
+
+This package is a fork of [github.com/hack-pad/go-indexeddb](https://github.com/hack-pad/go-indexeddb).
+
+## License
+
+MIT

@@ -1,1 +1,8 @@
-/cover.out
+/.cache/
+/.gocache/
+/bin/
+/vendor/
+.#*
+.aider*
+debug.test*
+/node_modules

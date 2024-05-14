@@ -8,7 +8,7 @@ import (
 	"context"
 	"syscall/js"
 
-	"github.com/hack-pad/go-indexeddb/idb"
+	"github.com/aperturerobotics/go-indexeddb/idb"
 )
 
 var (

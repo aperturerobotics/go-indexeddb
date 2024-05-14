@@ -1,3 +1,4 @@
+//go:build !js
 // +build !js
 
 package idb
@@ -17,7 +18,7 @@ func TestAllWasmTags(t *testing.T) {
 		if err != nil || info.IsDir() {
 			return err
 		}
-		if path == "wasm_tags_test.go" {
+		if path == "wasm_tags_test.go" || path == "notjs.go" {
 			// ignore this file, since it must run with file system support enabled
 			return nil
 		}

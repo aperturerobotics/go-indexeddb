@@ -7,7 +7,7 @@ import (
 	"syscall/js"
 	"testing"
 
-	"github.com/hack-pad/go-indexeddb/idb/internal/assert"
+	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
 	"github.com/hack-pad/safejs"
 )
 

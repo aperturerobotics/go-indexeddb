@@ -7,7 +7,7 @@ import (
 	"context"
 	"errors"
 
-	"github.com/hack-pad/go-indexeddb/idb/internal/jscache"
+	"github.com/aperturerobotics/go-indexeddb/idb/internal/jscache"
 	"github.com/hack-pad/safejs"
 )
 
