@@ -25,7 +25,7 @@ Summary of the packages provided by this module:
 
 - [`idb`][idb-pkg]: Package `idb` provides a low-level Go driver with type-safe bindings to IndexedDB in Wasm programs.
 
-[idb-pkg]: https://pkg.go.dev/github.com/aperturerobotics/go-indexeddb/idb
+[idb-pkg]: https://pkg.go.dev/github.com/aperturerobotics/go-indexeddb/idb?GOOS=js
 
 ## Usage
 
