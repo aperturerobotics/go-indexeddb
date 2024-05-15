@@ -49,6 +49,27 @@ Summary of the packages provided by this module:
 
 Check out the [reference][] for more details and examples!
 
+## Testing
+
+This package can be tested in a browser environment using `wasmbrowsertest`.
+
+1. Install `wasmbrowsertest`:
+   ```bash
+   go install github.com/agnivade/wasmbrowsertest@latest
+   ```
+
+2. Rename the `wasmbrowsertest` binary to `go_js_wasm_exec`:
+   ```bash
+   mv $(go env GOPATH)/bin/wasmbrowsertest $(go env GOPATH)/bin/go_js_wasm_exec
+   ```
+
+3. Run the tests with the `js` GOOS and `wasm` GOARCH:
+   ```bash
+   GOOS=js GOARCH=wasm go test -v ./...
+   ```
+
+This will compile the tests to WebAssembly and run them in a headless browser environment.
+
 ## Upstream
 
 This package is a fork of [github.com/hack-pad/go-indexeddb](https://github.com/hack-pad/go-indexeddb).
