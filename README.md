@@ -51,7 +51,7 @@ Check out the [reference][] for more details and examples!
 
 ## Testing
 
-This package can be tested in a browser environment using `wasmbrowsertest`.
+This package can be tested in a browser environment using [`wasmbrowsertest`](https://github.com/agnivade/wasmbrowsertest).
 
 1. Install `wasmbrowsertest`:
    ```bash
