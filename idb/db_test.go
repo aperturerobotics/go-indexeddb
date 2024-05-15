@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
+	"github.com/hack-pad/safejs"
 )
 
 func testDB(tb testing.TB, initFunc func(*Database)) *Database {
@@ -89,7 +90,7 @@ func TestDatabaseCreateObjectStore(t *testing.T) {
 
 		keyPath, err := store.KeyPath()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf("primary"), keyPath)
+		assert.Equal(t, safejs.Safe(js.ValueOf("primary")), keyPath)
 		autoIncrement, err := store.AutoIncrement()
 		assert.NoError(t, err)
 		assert.Equal(t, true, autoIncrement)

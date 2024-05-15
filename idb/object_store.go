@@ -34,9 +34,8 @@ func (o *ObjectStore) IndexNames() ([]string, error) {
 }
 
 // KeyPath returns the key path of this object store. If this returns js.Null(), the application must provide a key for each modification operation.
-func (o *ObjectStore) KeyPath() (js.Value, error) {
-	keyPath, err := o.base.jsObjectStore.Get("keyPath")
-	return safejs.Unsafe(keyPath), err
+func (o *ObjectStore) KeyPath() (safejs.Value, error) {
+	return o.base.jsObjectStore.Get("keyPath")
 }
 
 // Name returns the name of this object store.
@@ -101,8 +100,8 @@ func (o *ObjectStore) Count() (*UintRequest, error) {
 }
 
 // CountKey returns a UintRequest, and, in a separate thread, returns the total number of records that match the provided key.
-func (o *ObjectStore) CountKey(key js.Value) (*UintRequest, error) {
-	return o.base.CountKey(safejs.Safe(key))
+func (o *ObjectStore) CountKey(key safejs.Value) (*UintRequest, error) {
+	return o.base.CountKey(key)
 }
 
 // CountRange returns a UintRequest, and, in a separate thread, returns the total number of records that match the provided KeyRange.
@@ -149,13 +148,13 @@ func (o *ObjectStore) GetAllKeysRange(query *KeyRange, maxCount uint) (*ArrayReq
 }
 
 // Get returns a Request, and, in a separate thread, returns the objects selected by the specified key. This is for retrieving specific records from an object store.
-func (o *ObjectStore) Get(key js.Value) (*Request, error) {
-	return o.base.Get(safejs.Safe(key))
+func (o *ObjectStore) Get(key safejs.Value) (*Request, error) {
+	return o.base.Get(key)
 }
 
 // GetKey returns a Request, and, in a separate thread retrieves and returns the record key for the object matching the specified parameter.
-func (o *ObjectStore) GetKey(value js.Value) (*Request, error) {
-	return o.base.GetKey(safejs.Safe(value))
+func (o *ObjectStore) GetKey(value safejs.Value) (*Request, error) {
+	return o.base.GetKey(value)
 }
 
 // Index opens an index from this object store after which it can, for example, be used to return a sequence of records sorted by that index using a cursor.
@@ -191,8 +190,8 @@ func (o *ObjectStore) OpenCursor(direction CursorDirection) (*CursorWithValueReq
 }
 
 // OpenCursorKey is the same as OpenCursor, but opens a cursor over the given key instead.
-func (o *ObjectStore) OpenCursorKey(key js.Value, direction CursorDirection) (*CursorWithValueRequest, error) {
-	return o.base.OpenCursorKey(safejs.Safe(key), direction)
+func (o *ObjectStore) OpenCursorKey(key safejs.Value, direction CursorDirection) (*CursorWithValueRequest, error) {
+	return o.base.OpenCursorKey(key, direction)
 }
 
 // OpenCursorRange is the same as OpenCursor, but opens a cursor over the given range instead.
@@ -206,8 +205,8 @@ func (o *ObjectStore) OpenKeyCursor(direction CursorDirection) (*CursorRequest, 
 }
 
 // OpenKeyCursorKey is the same as OpenKeyCursor, but opens a cursor over the given key instead.
-func (o *ObjectStore) OpenKeyCursorKey(key js.Value, direction CursorDirection) (*CursorRequest, error) {
-	return o.base.OpenKeyCursorKey(safejs.Safe(key), direction)
+func (o *ObjectStore) OpenKeyCursorKey(key safejs.Value, direction CursorDirection) (*CursorRequest, error) {
+	return o.base.OpenKeyCursorKey(key, direction)
 }
 
 // OpenKeyCursorRange is the same as OpenKeyCursor, but opens a cursor over the given key range instead.

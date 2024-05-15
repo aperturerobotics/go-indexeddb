@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
+	"github.com/hack-pad/safejs"
 )
 
 func TestObjectStoreIndexNames(t *testing.T) {
@@ -44,7 +45,7 @@ func TestObjectStoreKeyPath(t *testing.T) {
 
 	keyPath, err := store.KeyPath()
 	assert.NoError(t, err)
-	assert.Equal(t, js.ValueOf("primary"), keyPath)
+	assert.Equal(t, safejs.Safe(js.ValueOf("primary")), keyPath)
 }
 
 func TestObjectStoreName(t *testing.T) {
@@ -117,7 +118,9 @@ func TestObjectStoreAdd(t *testing.T) {
 		"id": "some id",
 	}))
 	assert.NoError(t, err)
-	getReq, err := store.GetKey(js.ValueOf("some id"))
+	getVal, err := safejs.ValueOf("some id")
+	assert.NoError(t, err)
+	getReq, err := store.GetKey(getVal)
 	assert.NoError(t, err)
 
 	assert.NoError(t, addReq.Await(ctx))
@@ -174,7 +177,11 @@ func TestObjectStoreCount(t *testing.T) {
 		{
 			name: "count key",
 			countFn: func(store *ObjectStore) (*UintRequest, error) {
-				return store.CountKey(js.ValueOf("some key"))
+				val, err := safejs.ValueOf("some key")
+				if err != nil {
+					return nil, err
+				}
+				return store.CountKey(val)
 			},
 		},
 		{
@@ -247,7 +254,9 @@ func TestObjectStoreDelete(t *testing.T) {
 
 	_, err = store.Delete(js.ValueOf("some key"))
 	assert.NoError(t, err)
-	req, err := store.GetKey(js.ValueOf("some key"))
+	getKeyVal, err := safejs.ValueOf("some key")
+	assert.NoError(t, err)
+	req, err := store.GetKey(getKeyVal)
 	assert.NoError(t, err)
 	result, err := req.Await(context.Background())
 	assert.NoError(t, err)
@@ -308,7 +317,11 @@ func TestObjectStoreGet(t *testing.T) {
 				"some id": "some value",
 			},
 			getFn: func(store *ObjectStore) (interface{}, error) {
-				return store.Get(js.ValueOf("some id"))
+				getKeyVal, err := safejs.ValueOf("some id")
+				if err != nil {
+					return nil, err
+				}
+				return store.Get(getKeyVal)
 			},
 			expectResult: js.ValueOf("some value"),
 		},
@@ -318,7 +331,11 @@ func TestObjectStoreGet(t *testing.T) {
 				"some id": "some value",
 			},
 			getFn: func(store *ObjectStore) (interface{}, error) {
-				return store.GetKey(js.ValueOf("some id"))
+				getKeyVal, err := safejs.ValueOf("some id")
+				if err != nil {
+					return nil, err
+				}
+				return store.GetKey(getKeyVal)
 			},
 			expectResult: js.ValueOf("some id"),
 		},
@@ -461,7 +478,7 @@ func TestObjectStoreOpenCursor(t *testing.T) {
 				"some other id": "some other value",
 			},
 			cursorFn: func(store *ObjectStore) (interface{}, error) {
-				return store.OpenCursorKey(js.ValueOf("some id"), CursorNext)
+				return store.OpenCursorKey(safejs.Safe(js.ValueOf("some id")), CursorNext)
 			},
 			expectResults: []js.Value{
 				js.ValueOf("some value"),
@@ -503,7 +520,7 @@ func TestObjectStoreOpenCursor(t *testing.T) {
 				"some other id": "some other value",
 			},
 			cursorFn: func(store *ObjectStore) (interface{}, error) {
-				return store.OpenKeyCursorKey(js.ValueOf("some id"), CursorNext)
+				return store.OpenKeyCursorKey(safejs.Safe(js.ValueOf("some id")), CursorNext)
 			},
 			expectResults: []js.Value{
 				js.ValueOf("some id"),
