@@ -89,21 +89,35 @@ func (r *Request) Err() (err error) {
 }
 
 // SafeAwait is Await but returns a safejs.Value.
-func (r *Request) SafeAwait(ctx context.Context) (result safejs.Value, awaitErr error) {
+func (r *Request) SafeAwait(ctx context.Context) (safejs.Value, error) {
+	resultCh := make(chan safejs.Value, 1)
+	errCh := make(chan error, 1)
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
-	listenErr := r.Listen(ctx, func() {
-		result, awaitErr = r.result()
-		cancel()
+
+	err := r.Listen(ctx, func() {
+		result, err := r.result()
+		if err != nil {
+			errCh <- err
+		} else {
+			resultCh <- result
+		}
 	}, func() {
-		awaitErr = r.Err()
-		cancel()
+		errCh <- r.Err()
 	})
-	if listenErr != nil {
-		return result, listenErr
+	if err != nil {
+		return safejs.Null(), err
 	}
-	<-ctx.Done()
-	return result, awaitErr
+
+	select {
+	case result := <-resultCh:
+		return result, nil
+	case err := <-errCh:
+		return safejs.Null(), err
+	case <-ctx.Done():
+		return safejs.Null(), ctx.Err()
+	}
 }
 
 // Await waits for success or failure, then returns the results.
