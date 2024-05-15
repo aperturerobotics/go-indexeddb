@@ -9,11 +9,12 @@ import (
 	"testing"
 
 	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
+	"github.com/hack-pad/safejs"
 )
 
 func TestNewKeyRangeBound(t *testing.T) {
 	t.Parallel()
-	keyRangeClosedOpen, err := NewKeyRangeBound(js.ValueOf(0), js.ValueOf(100), false, true)
+	keyRangeClosedOpen, err := NewKeyRangeBound(safejs.Safe(js.ValueOf(0)), safejs.Safe(js.ValueOf(100)), false, true)
 	assert.NoError(t, err)
 	for _, tc := range []struct {
 		name           string // auto-filled, satisfies paralleltest linter
@@ -29,13 +30,13 @@ func TestNewKeyRangeBound(t *testing.T) {
 		tc := tc // keep loop-local copy of test case for parallel runs
 		t.Run(fmt.Sprint(tc.input), func(t *testing.T) {
 			t.Parallel()
-			includes, err := keyRangeClosedOpen.Includes(js.ValueOf(tc.input))
+			includes, err := keyRangeClosedOpen.Includes(safejs.Safe(js.ValueOf(tc.input)))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expectIncludes, includes)
 		})
 	}
 
-	keyRangeOpenClosed, err := NewKeyRangeBound(js.ValueOf(0), js.ValueOf(100), true, false)
+	keyRangeOpenClosed, err := NewKeyRangeBound(safejs.Safe(js.ValueOf(0)), safejs.Safe(js.ValueOf(100)), true, false)
 	assert.NoError(t, err)
 	for _, tc := range []struct {
 		name           string // auto-filled, satisfies paralleltest linter
@@ -51,7 +52,7 @@ func TestNewKeyRangeBound(t *testing.T) {
 		tc := tc // keep loop-local copy of test case for parallel runs
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			includes, err := keyRangeOpenClosed.Includes(js.ValueOf(tc.input))
+			includes, err := keyRangeOpenClosed.Includes(safejs.Safe(js.ValueOf(tc.input)))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expectIncludes, includes)
 		})
@@ -60,7 +61,7 @@ func TestNewKeyRangeBound(t *testing.T) {
 
 func TestNewKeyRangeLowerBound(t *testing.T) {
 	t.Parallel()
-	keyRangeOpen, err := NewKeyRangeLowerBound(js.ValueOf(0), true)
+	keyRangeOpen, err := NewKeyRangeLowerBound(safejs.Safe(js.ValueOf(0)), true)
 	assert.NoError(t, err)
 	for _, tc := range []struct {
 		input          int
@@ -73,13 +74,13 @@ func TestNewKeyRangeLowerBound(t *testing.T) {
 		tc := tc // keep loop-local copy of test case for parallel runs
 		t.Run(fmt.Sprint("open ", tc.input), func(t *testing.T) {
 			t.Parallel()
-			includes, err := keyRangeOpen.Includes(js.ValueOf(tc.input))
+			includes, err := keyRangeOpen.Includes(safejs.Safe(js.ValueOf(tc.input)))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expectIncludes, includes)
 		})
 	}
 
-	keyRangeClosed, err := NewKeyRangeLowerBound(js.ValueOf(0), false)
+	keyRangeClosed, err := NewKeyRangeLowerBound(safejs.Safe(js.ValueOf(0)), false)
 	assert.NoError(t, err)
 	for _, tc := range []struct {
 		name           string // auto-filled, satisfies paralleltest linter
@@ -94,7 +95,7 @@ func TestNewKeyRangeLowerBound(t *testing.T) {
 		tc := tc // keep loop-local copy of test case for parallel runs
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			includes, err := keyRangeClosed.Includes(js.ValueOf(tc.input))
+			includes, err := keyRangeClosed.Includes(safejs.Safe(js.ValueOf(tc.input)))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expectIncludes, includes)
 		})
@@ -103,7 +104,7 @@ func TestNewKeyRangeLowerBound(t *testing.T) {
 
 func TestNewKeyRangeUpperBound(t *testing.T) {
 	t.Parallel()
-	keyRangeOpen, err := NewKeyRangeUpperBound(js.ValueOf(100), true)
+	keyRangeOpen, err := NewKeyRangeUpperBound(safejs.Safe(js.ValueOf(100)), true)
 	assert.NoError(t, err)
 	for _, tc := range []struct {
 		name           string // auto-filled, satisfies paralleltest linter
@@ -117,13 +118,13 @@ func TestNewKeyRangeUpperBound(t *testing.T) {
 		tc := tc // keep loop-local copy of test case for parallel runs
 		t.Run(fmt.Sprint("open ", tc.input), func(t *testing.T) {
 			t.Parallel()
-			includes, err := keyRangeOpen.Includes(js.ValueOf(tc.input))
+			includes, err := keyRangeOpen.Includes(safejs.Safe(js.ValueOf(tc.input)))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expectIncludes, includes)
 		})
 	}
 
-	keyRangeClosed, err := NewKeyRangeUpperBound(js.ValueOf(100), false)
+	keyRangeClosed, err := NewKeyRangeUpperBound(safejs.Safe(js.ValueOf(100)), false)
 	assert.NoError(t, err)
 	for _, tc := range []struct {
 		name           string // auto-filled, satisfies paralleltest linter
@@ -138,7 +139,7 @@ func TestNewKeyRangeUpperBound(t *testing.T) {
 		tc := tc // keep loop-local copy of test case for parallel runs
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			includes, err := keyRangeClosed.Includes(js.ValueOf(tc.input))
+			includes, err := keyRangeClosed.Includes(safejs.Safe(js.ValueOf(tc.input)))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expectIncludes, includes)
 		})
@@ -147,7 +148,7 @@ func TestNewKeyRangeUpperBound(t *testing.T) {
 
 func TestNewKeyRangeOnly(t *testing.T) {
 	t.Parallel()
-	keyRange, err := NewKeyRangeOnly(js.ValueOf(100))
+	keyRange, err := NewKeyRangeOnly(safejs.Safe(js.ValueOf(100)))
 	assert.NoError(t, err)
 	for _, tc := range []struct {
 		name           string // auto-filled, satisfies paralleltest linter
@@ -161,7 +162,7 @@ func TestNewKeyRangeOnly(t *testing.T) {
 		tc := tc // keep loop-local copy of test case for parallel runs
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
-			includes, err := keyRange.Includes(js.ValueOf(tc.input))
+			includes, err := keyRange.Includes(safejs.Safe(js.ValueOf(tc.input)))
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expectIncludes, includes)
 		})
@@ -170,12 +171,12 @@ func TestNewKeyRangeOnly(t *testing.T) {
 
 func TestKeyRangeBoundProperties(t *testing.T) {
 	t.Parallel()
-	keyRange, err := NewKeyRangeBound(js.ValueOf(0), js.ValueOf(100), false, true)
+	keyRange, err := NewKeyRangeBound(safejs.Safe(js.ValueOf(0)), safejs.Safe(js.ValueOf(100)), false, true)
 	assert.NoError(t, err)
 
 	lower, err := keyRange.Lower()
 	assert.NoError(t, err)
-	assert.Equal(t, js.ValueOf(0), lower)
+	assert.Equal(t, safejs.Safe(js.ValueOf(0)), lower)
 
 	lowerOpen, err := keyRange.LowerOpen()
 	assert.NoError(t, err)
@@ -183,7 +184,7 @@ func TestKeyRangeBoundProperties(t *testing.T) {
 
 	upper, err := keyRange.Upper()
 	assert.NoError(t, err)
-	assert.Equal(t, js.ValueOf(100), upper)
+	assert.Equal(t, safejs.Safe(js.ValueOf(100)), upper)
 
 	upperOpen, err := keyRange.UpperOpen()
 	assert.NoError(t, err)

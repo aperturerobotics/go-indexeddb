@@ -187,7 +187,7 @@ func TestObjectStoreCount(t *testing.T) {
 		{
 			name: "count range",
 			countFn: func(store *ObjectStore) (*UintRequest, error) {
-				keyRange, err := NewKeyRangeOnly(js.ValueOf("some key"))
+				keyRange, err := NewKeyRangeOnly(safejs.Safe(js.ValueOf("some key")))
 				assert.NoError(t, err)
 				return store.CountRange(keyRange)
 			},
@@ -305,7 +305,7 @@ func TestObjectStoreGet(t *testing.T) {
 				"some other id": "some other value",
 			},
 			getFn: func(store *ObjectStore) (interface{}, error) {
-				keyRange, err := NewKeyRangeOnly(js.ValueOf("some id"))
+				keyRange, err := NewKeyRangeOnly(safejs.Safe(js.ValueOf("some id")))
 				assert.NoError(t, err)
 				return store.GetAllKeysRange(keyRange, 10)
 			},
@@ -491,7 +491,7 @@ func TestObjectStoreOpenCursor(t *testing.T) {
 				"some other id": "some other value",
 			},
 			cursorFn: func(store *ObjectStore) (interface{}, error) {
-				keyRange, err := NewKeyRangeLowerBound(js.ValueOf("some more"), true)
+				keyRange, err := NewKeyRangeLowerBound(safejs.Safe(js.ValueOf("some more")), true)
 				assert.NoError(t, err)
 				return store.OpenCursorRange(keyRange, CursorNext)
 			},
@@ -533,7 +533,7 @@ func TestObjectStoreOpenCursor(t *testing.T) {
 				"some other id": "some other value",
 			},
 			cursorFn: func(store *ObjectStore) (interface{}, error) {
-				keyRange, err := NewKeyRangeLowerBound(js.ValueOf("some more"), true)
+				keyRange, err := NewKeyRangeLowerBound(safejs.Safe(js.ValueOf("some more")), true)
 				assert.NoError(t, err)
 				return store.OpenKeyCursorRange(keyRange, CursorNext)
 			},

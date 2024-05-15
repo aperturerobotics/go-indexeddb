@@ -4,8 +4,6 @@
 package idb
 
 import (
-	"syscall/js"
-
 	"github.com/hack-pad/safejs"
 )
 
@@ -32,7 +30,7 @@ func wrapKeyRange(jsKeyRange safejs.Value) *KeyRange {
 
 // NewKeyRangeBound creates a new key range with the specified upper and lower bounds.
 // The bounds can be open (that is, the bounds exclude the endpoint values) or closed (that is, the bounds include the endpoint values).
-func NewKeyRangeBound(lower, upper js.Value, lowerOpen, upperOpen bool) (*KeyRange, error) {
+func NewKeyRangeBound(lower, upper safejs.Value, lowerOpen, upperOpen bool) (*KeyRange, error) {
 	keyRange, err := jsIDBKeyRange.Call("bound", lower, upper, lowerOpen, upperOpen)
 	if err != nil {
 		return nil, tryAsDOMException(err)
@@ -41,7 +39,7 @@ func NewKeyRangeBound(lower, upper js.Value, lowerOpen, upperOpen bool) (*KeyRan
 }
 
 // NewKeyRangeLowerBound creates a new key range with only a lower bound.
-func NewKeyRangeLowerBound(lower js.Value, open bool) (*KeyRange, error) {
+func NewKeyRangeLowerBound(lower safejs.Value, open bool) (*KeyRange, error) {
 	keyRange, err := jsIDBKeyRange.Call("lowerBound", lower, open)
 	if err != nil {
 		return nil, tryAsDOMException(err)
@@ -50,7 +48,7 @@ func NewKeyRangeLowerBound(lower js.Value, open bool) (*KeyRange, error) {
 }
 
 // NewKeyRangeUpperBound creates a new key range with only an upper bound.
-func NewKeyRangeUpperBound(upper js.Value, open bool) (*KeyRange, error) {
+func NewKeyRangeUpperBound(upper safejs.Value, open bool) (*KeyRange, error) {
 	keyRange, err := jsIDBKeyRange.Call("upperBound", upper, open)
 	if err != nil {
 		return nil, tryAsDOMException(err)
@@ -59,7 +57,7 @@ func NewKeyRangeUpperBound(upper js.Value, open bool) (*KeyRange, error) {
 }
 
 // NewKeyRangeOnly creates a new key range containing a single value.
-func NewKeyRangeOnly(only js.Value) (*KeyRange, error) {
+func NewKeyRangeOnly(only safejs.Value) (*KeyRange, error) {
 	keyRange, err := jsIDBKeyRange.Call("only", only)
 	if err != nil {
 		return nil, tryAsDOMException(err)
@@ -68,15 +66,15 @@ func NewKeyRangeOnly(only js.Value) (*KeyRange, error) {
 }
 
 // Lower returns the lower bound of the key range.
-func (k *KeyRange) Lower() (js.Value, error) {
+func (k *KeyRange) Lower() (safejs.Value, error) {
 	lower, err := k.jsKeyRange.Get("lower")
-	return safejs.Unsafe(lower), err
+	return lower, err
 }
 
 // Upper returns the upper bound of the key range.
-func (k *KeyRange) Upper() (js.Value, error) {
+func (k *KeyRange) Upper() (safejs.Value, error) {
 	upper, err := k.jsKeyRange.Get("upper")
-	return safejs.Unsafe(upper), err
+	return upper, err
 }
 
 // LowerOpen returns false if the lower-bound value is included in the key range.
@@ -98,7 +96,7 @@ func (k *KeyRange) UpperOpen() (bool, error) {
 }
 
 // Includes returns a boolean indicating whether a specified key is inside the key range.
-func (k *KeyRange) Includes(key js.Value) (bool, error) {
+func (k *KeyRange) Includes(key safejs.Value) (bool, error) {
 	includes, err := k.jsKeyRange.Call("includes", key)
 	if err != nil {
 		return false, tryAsDOMException(err)
