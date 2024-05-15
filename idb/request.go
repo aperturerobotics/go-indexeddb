@@ -343,48 +343,29 @@ func (a *AckRequest) Await(ctx context.Context) error {
 }
 
 func cursorIter(ctx context.Context, req *Request, iter func(*Cursor) error) error {
-	ctx, cancel := context.WithCancel(ctx)
-	var returnErr error
-	listenErr := req.listen(ctx, func() {
-		jsCursor, err := req.result()
+	for {
+		jsCursor, err := req.SafeAwait(ctx)
 		if err != nil {
-			returnErr = err
-			cancel()
-			return
+			return err
 		}
 		if jsCursor.IsNull() {
-			cancel()
-			return
+			return nil
 		}
 		cursor := wrapCursor(req.txn, jsCursor)
 		err = iter(cursor)
 		if err != nil {
-			if err != ErrCursorStopIter {
-				returnErr = err
+			if err == ErrCursorStopIter {
+				return nil
 			}
-			cancel()
-			return
+			return err
 		}
 		if !cursor.iterated {
 			err := cursor.Continue()
 			if err != nil {
-				returnErr = err
-				cancel()
-				return
+				return err
 			}
 		}
-	}, func() {
-		returnErr = req.Err()
-		if returnErr == nil {
-			returnErr = errors.New("Failed to handle panic in JS callback")
-		}
-		cancel()
-	})
-	if listenErr != nil {
-		return listenErr
 	}
-	<-ctx.Done()
-	return returnErr
 }
 
 // CursorRequest is a Request that retrieves a Cursor
