@@ -82,8 +82,9 @@ func testGetDatabases(tb testing.TB, dbFactory *Factory) []string {
 }
 
 func TestFactoryOpenNewDB(t *testing.T) { // nolint:paralleltest // Deletes all databases, should not run in parallel.
+	ctx := context.Background()
 	dbFactory := testFactory(t)
-	req, err := dbFactory.Open(context.Background(), testDBPrefix+"mydb", 0, func(db *Database, oldVersion, newVersion uint) error {
+	req, err := dbFactory.Open(ctx, testDBPrefix+"mydb", 0, func(db *Database, oldVersion, newVersion uint) error {
 		assert.Equal(t, uint(0), oldVersion)
 		assert.Equal(t, uint(1), newVersion)
 		return nil
@@ -91,53 +92,56 @@ func TestFactoryOpenNewDB(t *testing.T) { // nolint:paralleltest // Deletes all 
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
-	db, err := req.Await(context.Background())
+	db, err := req.Await(ctx)
 	assert.NoError(t, err)
 	assert.NotZero(t, db)
 	assert.NoError(t, db.Close())
 }
 
 func TestFactoryOpenExistingDB(t *testing.T) { // nolint:paralleltest // Deletes all databases, should not run in parallel.
+	ctx := context.Background()
 	dbFactory := testFactory(t)
-	_, err := dbFactory.Open(context.Background(), testDBPrefix+"mydb", 1, func(db *Database, oldVersion, newVersion uint) error {
+	_, err := dbFactory.Open(ctx, testDBPrefix+"mydb", 1, func(db *Database, oldVersion, newVersion uint) error {
 		return nil
 	})
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
 
-	req, err := dbFactory.Open(context.Background(), testDBPrefix+"mydb", 1, func(db *Database, oldVersion, newVersion uint) error {
+	req, err := dbFactory.Open(ctx, testDBPrefix+"mydb", 1, func(db *Database, oldVersion, newVersion uint) error {
 		t.Error("Should not call upgrade")
 		return nil
 	})
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
-	db, err := req.Await(context.Background())
+	db, err := req.Await(ctx)
 	assert.NoError(t, err)
 	assert.NotZero(t, db)
 	assert.NoError(t, db.Close())
 }
 
 func TestFactoryDeleteMissingDatabase(t *testing.T) { // nolint:paralleltest // Deletes all databases, should not run in parallel.
+	ctx := context.Background()
 	dbFactory := testFactory(t)
 	req, err := dbFactory.DeleteDatabase("does not exist")
 	assert.NoError(t, err)
-	err = req.Await(context.Background())
+	err = req.Await(ctx)
 	assert.NoError(t, err)
 }
 
 func TestFactoryDeleteDatabase(t *testing.T) { // nolint:paralleltest // Deletes all databases, should not run in parallel.
+	ctx := context.Background()
 	dbFactory := testFactory(t)
 	var db *Database
 	{
-		req, err := dbFactory.Open(context.Background(), testDBPrefix+"mydb", 0, func(db *Database, oldVersion, newVersion uint) error {
+		req, err := dbFactory.Open(ctx, testDBPrefix+"mydb", 0, func(db *Database, oldVersion, newVersion uint) error {
 			_, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 			assert.NoError(t, err)
 			return nil
 		})
 		assert.NoError(t, err)
-		db, err = req.Await(context.Background())
+		db, err = req.Await(ctx)
 		assert.NoError(t, err)
 		names, err := db.ObjectStoreNames()
 		assert.NoError(t, err)
@@ -149,7 +153,7 @@ func TestFactoryDeleteDatabase(t *testing.T) { // nolint:paralleltest // Deletes
 
 	req, err := dbFactory.DeleteDatabase(testDBPrefix + "mydb")
 	assert.NoError(t, err)
-	err = req.Await(context.Background())
+	err = req.Await(ctx)
 	assert.NoError(t, err)
 
 	// database should be closed and unusable now

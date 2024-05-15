@@ -15,20 +15,21 @@ import (
 )
 
 func testDB(tb testing.TB, initFunc func(*Database)) *Database {
+	ctx := context.Background()
 	tb.Helper()
 	dbFactory := Global()
 
 	n, err := rand.Int(rand.Reader, big.NewInt(1000))
 	assert.NoError(tb, err)
 	name := fmt.Sprintf("%s%s/%d", testDBPrefix, tb.Name(), n.Int64())
-	req, err := dbFactory.Open(context.Background(), name, 0, func(db *Database, oldVersion, newVersion uint) error {
+	req, err := dbFactory.Open(ctx, name, 0, func(db *Database, oldVersion, newVersion uint) error {
 		initFunc(db)
 		return nil
 	})
 	if !assert.NoError(tb, err) {
 		tb.FailNow()
 	}
-	db, err := req.Await(context.Background())
+	db, err := req.Await(ctx)
 	if !assert.NoError(tb, err) {
 		tb.FailNow()
 	}
@@ -36,7 +37,7 @@ func testDB(tb testing.TB, initFunc func(*Database)) *Database {
 		assert.NoError(tb, db.Close())
 		req, err := dbFactory.DeleteDatabase(name)
 		assert.NoError(tb, err)
-		assert.NoError(tb, req.Await(context.Background()))
+		assert.NoError(tb, req.Await(ctx))
 	})
 	return db
 }
@@ -167,7 +168,8 @@ func TestDatabaseTransaction(t *testing.T) {
 			assert.NoError(t, err)
 
 			// wait for the whole txn to complete
-			assert.NoError(t, txn.Await(context.Background()))
+			ctx := context.Background()
+			assert.NoError(t, txn.Await(ctx))
 			result, err := req.Result()
 			assert.NoError(t, err)
 			assert.Equal(t, []js.Value{js.ValueOf("key1")}, result)

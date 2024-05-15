@@ -100,6 +100,7 @@ func TestObjectStoreTransaction(t *testing.T) {
 }
 
 func TestObjectStoreAdd(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	db := testDB(t, func(db *Database) {
 		_, err := db.CreateObjectStore("mystore", ObjectStoreOptions{
@@ -119,13 +120,14 @@ func TestObjectStoreAdd(t *testing.T) {
 	getReq, err := store.GetKey(js.ValueOf("some id"))
 	assert.NoError(t, err)
 
-	assert.NoError(t, addReq.Await(context.Background()))
-	result, err := getReq.Await(context.Background())
+	assert.NoError(t, addReq.Await(ctx))
+	result, err := getReq.Await(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, js.ValueOf("some id"), result)
 }
 
 func TestObjectStoreClear(t *testing.T) {
+	ctx := context.Background()
 	t.Parallel()
 	db := testDB(t, func(db *Database) {
 		_, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
@@ -138,7 +140,7 @@ func TestObjectStoreClear(t *testing.T) {
 		assert.NoError(t, err)
 		_, err = store.AddKey(js.ValueOf("some key"), js.ValueOf("some value"))
 		assert.NoError(t, err)
-		assert.NoError(t, txn.Await(context.Background()))
+		assert.NoError(t, txn.Await(ctx))
 	}
 
 	txn, err := db.Transaction(TransactionReadWrite, "mystore")
@@ -150,8 +152,8 @@ func TestObjectStoreClear(t *testing.T) {
 	getReq, err := store.GetAllKeys()
 	assert.NoError(t, err)
 
-	assert.NoError(t, clearReq.Await(context.Background()))
-	result, err := getReq.Await(context.Background())
+	assert.NoError(t, clearReq.Await(ctx))
+	result, err := getReq.Await(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, []js.Value(nil), result)
 }
@@ -199,9 +201,10 @@ func TestObjectStoreCount(t *testing.T) {
 			_, err = store.AddKey(js.ValueOf("some key"), js.ValueOf("some value"))
 			assert.NoError(t, err)
 
+			ctx := context.Background()
 			req, err := tc.countFn(store)
 			assert.NoError(t, err)
-			count, err := req.Await(context.Background())
+			count, err := req.Await(ctx)
 			assert.NoError(t, err)
 
 			assert.Equal(t, uint(1), count)
@@ -337,12 +340,13 @@ func TestObjectStoreGet(t *testing.T) {
 			}
 			req, err := tc.getFn(store)
 			assert.NoError(t, err)
+			ctx := context.Background()
 			var result interface{}
 			switch req := req.(type) {
 			case *ArrayRequest:
-				result, err = req.Await(context.Background())
+				result, err = req.Await(ctx)
 			case *Request:
-				result, err = req.Await(context.Background())
+				result, err = req.Await(ctx)
 			default:
 				t.Fatalf("Invalid return type: %T", req)
 			}
@@ -383,12 +387,13 @@ func TestObjectStorePut(t *testing.T) {
 	store, err := txn.ObjectStore("mystore")
 	assert.NoError(t, err)
 
+	ctx := context.Background()
 	req, err := store.Put(js.ValueOf(map[string]interface{}{
 		"id":    "some id",
 		"value": "some value",
 	}))
 	assert.NoError(t, err)
-	resultKey, err := req.Await(context.Background())
+	resultKey, err := req.Await(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, js.ValueOf("some id"), resultKey)
 }
@@ -404,9 +409,10 @@ func TestObjectStorePutKey(t *testing.T) {
 	store, err := txn.ObjectStore("mystore")
 	assert.NoError(t, err)
 
+	ctx := context.Background()
 	req, err := store.PutKey(js.ValueOf("some id"), js.ValueOf("some value"))
 	assert.NoError(t, err)
-	resultKey, err := req.Await(context.Background())
+	resultKey, err := req.Await(ctx)
 	assert.NoError(t, err)
 	assert.Equal(t, js.ValueOf("some id"), resultKey)
 }
@@ -538,9 +544,10 @@ func TestObjectStoreOpenCursor(t *testing.T) {
 			req, err := tc.cursorFn(store)
 			assert.NoError(t, err)
 			var results []js.Value
+			ctx := context.Background()
 			switch req := req.(type) {
 			case *CursorWithValueRequest:
-				err := req.Iter(context.Background(), func(cursor *CursorWithValue) error {
+				err := req.Iter(ctx, func(cursor *CursorWithValue) error {
 					value, err := cursor.Value()
 					if assert.NoError(t, err) {
 						results = append(results, value)
@@ -551,7 +558,7 @@ func TestObjectStoreOpenCursor(t *testing.T) {
 				})
 				assert.NoError(t, err)
 			case *CursorRequest:
-				err := req.Iter(context.Background(), func(cursor *Cursor) error {
+				err := req.Iter(ctx, func(cursor *Cursor) error {
 					key, err := cursor.Key()
 					if assert.NoError(t, err) {
 						results = append(results, key)

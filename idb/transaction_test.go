@@ -78,7 +78,8 @@ func TestTransactionAbortErr(t *testing.T) {
 	_, err = store.AddKey(js.ValueOf("some id"), js.ValueOf(nil))
 	assert.NoError(t, err)
 
-	resultErr := txn.listenFinished(context.Background())
+	ctx := context.Background()
+	resultErr := txn.listenFinished(ctx)
 	assert.NoError(t, txn.Abort())
 	err = <-resultErr
 	assert.ErrorIs(t, err, NewDOMException("AbortError"))
@@ -157,7 +158,8 @@ func TestTransactionCommit(t *testing.T) {
 	err = txn.Commit()
 	assert.NoError(t, err)
 
-	assert.NoError(t, txn.Await(context.Background()))
+	ctx := context.Background()
+	assert.NoError(t, txn.Await(ctx))
 
 	err = txn.Commit()
 	assert.Error(t, err)

@@ -58,6 +58,7 @@ func TestCursorSource(t *testing.T) {
 
 func TestCursorDirection(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	for _, direction := range []CursorDirection{
 		CursorNext,
 		CursorNextUnique,
@@ -69,7 +70,7 @@ func TestCursorDirection(t *testing.T) {
 
 		req, err := store.OpenCursor(direction)
 		assert.NoError(t, err)
-		cursor, err := req.Await(context.Background())
+		cursor, err := req.Await(ctx)
 		assert.NoError(t, err)
 
 		actualDirection, err := cursor.Direction()
@@ -80,12 +81,13 @@ func TestCursorDirection(t *testing.T) {
 
 func TestCursorKey(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	store, _ := someKeyStore(t)
 	req, err := store.OpenCursor(CursorNext)
 	assert.NoError(t, err)
 
 	iterIndex := 0
-	assert.NoError(t, req.Iter(context.Background(), func(cursor *CursorWithValue) error {
+	assert.NoError(t, req.Iter(ctx, func(cursor *CursorWithValue) error {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
@@ -98,12 +100,13 @@ func TestCursorKey(t *testing.T) {
 
 func TestCursorPrimaryKey(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	store, _ := someKeyStore(t)
 	req, err := store.OpenCursor(CursorNext)
 	assert.NoError(t, err)
 
 	iterIndex := 0
-	assert.NoError(t, req.Iter(context.Background(), func(cursor *CursorWithValue) error {
+	assert.NoError(t, req.Iter(ctx, func(cursor *CursorWithValue) error {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.PrimaryKey()
 		assert.NoError(t, err)
@@ -116,11 +119,12 @@ func TestCursorPrimaryKey(t *testing.T) {
 
 func TestCursorRequest(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	store, _ := someKeyStore(t)
 	req, err := store.OpenCursor(CursorNext)
 	assert.NoError(t, err)
 
-	cursor, err := req.Await(context.Background())
+	cursor, err := req.Await(ctx)
 	assert.NoError(t, err)
 	cursorReq, err := cursor.Request()
 	assert.NoError(t, err)
@@ -129,12 +133,13 @@ func TestCursorRequest(t *testing.T) {
 
 func TestCursorAdvance(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	store, _ := someKeyStore(t)
 	req, err := store.OpenCursor(CursorNext)
 	assert.NoError(t, err)
 
 	iterIndex := 0
-	assert.NoError(t, req.Iter(context.Background(), func(cursor *CursorWithValue) error {
+	assert.NoError(t, req.Iter(ctx, func(cursor *CursorWithValue) error {
 		expectKey := someKeyStoreData[iterIndex*2][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
@@ -149,12 +154,13 @@ func TestCursorAdvance(t *testing.T) {
 
 func TestCursorContinue(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	store, _ := someKeyStore(t)
 	req, err := store.OpenCursor(CursorNext)
 	assert.NoError(t, err)
 
 	iterIndex := 0
-	assert.NoError(t, req.Iter(context.Background(), func(cursor *CursorWithValue) error {
+	assert.NoError(t, req.Iter(ctx, func(cursor *CursorWithValue) error {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
@@ -169,12 +175,13 @@ func TestCursorContinue(t *testing.T) {
 
 func TestCursorContinueKey(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	store, _ := someKeyStore(t)
 	req, err := store.OpenCursor(CursorNext)
 	assert.NoError(t, err)
 
 	iterIndex := 0
-	assert.NoError(t, req.Iter(context.Background(), func(cursor *CursorWithValue) error {
+	assert.NoError(t, req.Iter(ctx, func(cursor *CursorWithValue) error {
 		expectKey := someKeyStoreData[iterIndex*2][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
@@ -195,6 +202,7 @@ func TestCursorContinueKey(t *testing.T) {
 
 func TestCursorContinuePrimaryKey(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	_, index := someKeyStore(t)
 	req, err := index.OpenCursor(CursorNext)
 	assert.NoError(t, err)
@@ -204,7 +212,7 @@ func TestCursorContinuePrimaryKey(t *testing.T) {
 	}
 
 	iterIndex := 0
-	assert.NoError(t, req.Iter(context.Background(), func(cursor *CursorWithValue) error {
+	assert.NoError(t, req.Iter(ctx, func(cursor *CursorWithValue) error {
 		expectKey := getPrimaryKey(iterIndex * 2)
 		key, err := cursor.Key()
 		assert.NoError(t, err)
@@ -226,12 +234,13 @@ func TestCursorContinuePrimaryKey(t *testing.T) {
 
 func TestCursorDelete(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	store, _ := someKeyStore(t)
 	req, err := store.OpenCursor(CursorNext)
 	assert.NoError(t, err)
 
 	iterIndex := 0
-	assert.NoError(t, req.Iter(context.Background(), func(cursor *CursorWithValue) error {
+	assert.NoError(t, req.Iter(ctx, func(cursor *CursorWithValue) error {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
@@ -252,20 +261,21 @@ func TestCursorDelete(t *testing.T) {
 	assert.NoError(t, err)
 	countReq, err := emptyStore.Count()
 	assert.NoError(t, err)
-	count, err := countReq.Await(context.Background())
+	count, err := countReq.Await(ctx)
 	assert.NoError(t, err)
 	assert.Zero(t, count)
 }
 
 func TestCursorUpdateAndValue(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	store, _ := someKeyStore(t)
 	req, err := store.OpenCursor(CursorNext)
 	assert.NoError(t, err)
 
 	// set all keys to their iteration index
 	iterIndex := 0
-	assert.NoError(t, req.Iter(context.Background(), func(cursor *CursorWithValue) error {
+	assert.NoError(t, req.Iter(ctx, func(cursor *CursorWithValue) error {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
@@ -287,7 +297,7 @@ func TestCursorUpdateAndValue(t *testing.T) {
 	cursorReq, err := updatedStore.OpenCursor(CursorNext)
 	assert.NoError(t, err)
 	ix := 0
-	assert.NoError(t, cursorReq.Iter(context.Background(), func(cursor *CursorWithValue) error {
+	assert.NoError(t, cursorReq.Iter(ctx, func(cursor *CursorWithValue) error {
 		value, err := cursor.Value()
 		assert.NoError(t, err)
 		assert.Equal(t, js.ValueOf(ix), value)

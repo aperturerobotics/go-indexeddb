@@ -50,9 +50,10 @@ func TestRequestSource(t *testing.T) {
 
 func TestRequestAwait(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	_, req := testRequest(t)
 
-	result, err := req.Await(context.Background())
+	result, err := req.Await(ctx)
 	assert.Equal(t, testRequestKey, result)
 	assert.NoError(t, err)
 
@@ -88,10 +89,11 @@ func TestRequestTransaction(t *testing.T) {
 
 func TestListen(t *testing.T) {
 	t.Parallel()
+	ctx := context.Background()
 	_, req := testRequest(t)
 
 	var successCount int64
-	err := req.Listen(context.Background(), func() {
+	err := req.Listen(ctx, func() {
 		atomic.AddInt64(&successCount, 1)
 		result, err := req.Result()
 		assert.NoError(t, err)

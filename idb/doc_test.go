@@ -21,9 +21,10 @@ var (
 )
 
 func Example() {
+	ctx := context.Background()
+	
 	// Create the 'library' database, then create a 'books' object store during setup.
 	// The setup func can also upgrade the database from older versions.
-	ctx := context.Background()
 	openRequest, _ := idb.Global().Open(ctx, "library", 1, func(db *idb.Database, oldVersion, newVersion uint) error {
 		db.CreateObjectStore("books", idb.ObjectStoreOptions{})
 		return nil
