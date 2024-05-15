@@ -205,31 +205,41 @@ func (t *Transaction) Commit() error {
 
 // Await waits for success or failure, then returns the results.
 func (t *Transaction) Await(ctx context.Context) error {
-	err := <-t.listenFinished(ctx)
-	return tryAsDOMException(err)
+	resultErr := t.listenFinished()
+	select {
+	case err := <-resultErr:
+		return tryAsDOMException(err)
+	case <-ctx.Done():
+		return ctx.Err()
+	}
 }
 
 // listenFinished listens to this transaction's completion events which eventually resolves with nil or an error.
 // Resolves with the first IDBRequest's error
-func (t *Transaction) listenFinished(ctx context.Context) <-chan error {
+func (t *Transaction) listenFinished() <-chan error {
 	result := make(chan error, 1)
-	resolveCtx, cancel := context.WithCancel(ctx)
+	pushResult := func(err error) {
+		select {
+		case result <- err:
+		default:
+		}
+	}
 
-	if err := t.addCancelingEventListener(resolveCtx, cancel, "abort", result, func(safejs.Value) error {
+	if err := t.addEventListener("abort", result, func(safejs.Value) error {
 		return t.Err() // catch abort errors not already caught by the error event handler, like QuotaExceededError
 	}); err != nil {
-		result <- err
+		pushResult(err)
 		return result
 	}
 
-	if err := t.addCancelingEventListener(resolveCtx, cancel, "complete", result, func(safejs.Value) error {
+	if err := t.addEventListener("complete", result, func(safejs.Value) error {
 		return nil // transaction was successful
 	}); err != nil {
-		result <- err
+		pushResult(err)
 		return result
 	}
 
-	if err := t.addCancelingEventListener(resolveCtx, cancel, "error", result, func(event safejs.Value) error {
+	if err := t.addEventListener("error", result, func(event safejs.Value) error {
 		// Error event target is always an IDBRequest, which is guaranteed to be a DOMException with a 'name' property.
 		properties, err := jsGetNested(event, "target", "error")
 		if err != nil {
@@ -237,17 +247,10 @@ func (t *Transaction) listenFinished(ctx context.Context) <-chan error {
 		}
 		return domExceptionAsError(properties[1])
 	}); err != nil {
-		result <- err
+		pushResult(err)
 		return result
 	}
 
-	go func() {
-		select {
-		case <-ctx.Done():
-			result <- ctx.Err()
-		case <-resolveCtx.Done():
-		}
-	}()
 	return result
 }
 
@@ -266,28 +269,24 @@ func jsGetNested(value safejs.Value, keys ...string) ([]safejs.Value, error) {
 	return append([]safejs.Value{nextValue}, values...), nil
 }
 
-// addCancelingEventListener adds an event listener for fn() and cleans it up when the context is canceled.
-// The listener only runs if the context has not completed yet, then cancels it.
+// addCancelingEventListener adds an event listener for fn()
 //
 // Sends fn's error return value to result.
 //
-// Effectively, this means multiple calls to addCancelingEventListener with the same ctx in a single-threaded environment results in exactly one running.
-func (t *Transaction) addCancelingEventListener(
-	ctx context.Context, cancel context.CancelFunc,
+// Result must be a buffered channel.
+func (t *Transaction) addEventListener(
 	eventName string,
 	result chan<- error,
 	fn func(event safejs.Value) error,
 ) error {
 	jsFunc, err := safejs.FuncOf(func(_ safejs.Value, args []safejs.Value) interface{} {
+		var event safejs.Value
+		if len(args) > 0 {
+			event = args[0]
+		}
 		select {
-		case <-ctx.Done():
+		case result <- fn(event):
 		default:
-			var event safejs.Value
-			if len(args) > 0 {
-				event = args[0]
-			}
-			result <- fn(event)
-			cancel()
 		}
 		return nil
 	})
@@ -298,10 +297,5 @@ func (t *Transaction) addCancelingEventListener(
 	if err != nil {
 		return tryAsDOMException(err)
 	}
-	go func() {
-		<-ctx.Done()
-		_, _ = t.jsTransaction.Call(removeEventListener, t.db.callStrings.Value(eventName), jsFunc) // clean up on best-effort basis
-		jsFunc.Release()
-	}()
 	return nil
 }

@@ -14,7 +14,6 @@ import (
 )
 
 func TestAllWasmTags(t *testing.T) {
-    ctx := context.Background()
 	walkErr := filepath.Walk(".", func(path string, info fs.FileInfo, err error) error {
 		if err != nil || info.IsDir() {
 			return err
@@ -24,12 +23,12 @@ func TestAllWasmTags(t *testing.T) {
 			return nil
 		}
 
-		f, err := os.Open(path, ctx)
+		f, err := os.Open(path)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
-		scanner := bufio.NewScanner(f, ctx)
+		scanner := bufio.NewScanner(f)
 		for scanner.Scan() {
 			line := strings.TrimSpace(scanner.Text())
 			if line == "" {
@@ -50,7 +49,7 @@ func TestAllWasmTags(t *testing.T) {
 				break
 			}
 		}
-		return scanner.Err(ctx)
+		return scanner.Err()
 	})
 	if walkErr != nil {
 		t.Error("Walk failed:", walkErr)
