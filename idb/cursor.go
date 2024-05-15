@@ -4,8 +4,6 @@
 package idb
 
 import (
-	"syscall/js"
-
 	"github.com/aperturerobotics/go-indexeddb/idb/internal/jscache"
 	"github.com/hack-pad/safejs"
 )
@@ -109,15 +107,13 @@ func (c *Cursor) Direction() (CursorDirection, error) {
 }
 
 // Key returns the key for the record at the cursor's position. If the cursor is outside its range, this is set to undefined.
-func (c *Cursor) Key() (js.Value, error) {
-	value, err := c.jsCursor.Get("key")
-	return safejs.Unsafe(value), err
+func (c *Cursor) Key() (safejs.Value, error) {
+	return c.jsCursor.Get("key")
 }
 
 // PrimaryKey returns the cursor's current effective primary key. If the cursor is currently being iterated or has iterated outside its range, this is set to undefined.
-func (c *Cursor) PrimaryKey() (js.Value, error) {
-	value, err := c.jsCursor.Get("primaryKey")
-	return safejs.Unsafe(value), err
+func (c *Cursor) PrimaryKey() (safejs.Value, error) {
+	return c.jsCursor.Get("primaryKey")
 }
 
 // Request returns the Request that was used to obtain the cursor.
@@ -144,14 +140,14 @@ func (c *Cursor) Continue() error {
 }
 
 // ContinueKey advances the cursor to the next position along its direction.
-func (c *Cursor) ContinueKey(key js.Value) error {
+func (c *Cursor) ContinueKey(key safejs.Value) error {
 	c.iterated = true
 	_, err := c.jsCursor.Call("continue", key)
 	return tryAsDOMException(err)
 }
 
 // ContinuePrimaryKey sets the cursor to the given index key and primary key given as arguments. Returns an error if the source is not an index.
-func (c *Cursor) ContinuePrimaryKey(key, primaryKey js.Value) error {
+func (c *Cursor) ContinuePrimaryKey(key, primaryKey safejs.Value) error {
 	c.iterated = true
 	_, err := c.jsCursor.Call("continuePrimaryKey", key, primaryKey)
 	return tryAsDOMException(err)
@@ -168,7 +164,7 @@ func (c *Cursor) Delete() (*AckRequest, error) {
 }
 
 // Update returns a Request, and, in a separate thread, updates the value at the current position of the cursor in the object store. This can be used to update specific records.
-func (c *Cursor) Update(value js.Value) (*Request, error) {
+func (c *Cursor) Update(value safejs.Value) (*Request, error) {
 	reqValue, err := c.jsCursor.Call("update", value)
 	if err != nil {
 		return nil, tryAsDOMException(err)
@@ -190,7 +186,6 @@ func wrapCursorWithValue(txn *Transaction, jsCursor safejs.Value) *CursorWithVal
 }
 
 // Value returns the value of the current cursor
-func (c *CursorWithValue) Value() (js.Value, error) {
-	value, err := c.jsCursor.Get("value")
-	return safejs.Unsafe(value), err
+func (c *CursorWithValue) Value() (safejs.Value, error) {
+	return c.jsCursor.Get("value")
 }

@@ -92,7 +92,7 @@ func TestCursorKey(t *testing.T) {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf(expectKey), key)
+		assert.Equal(t, safejs.Safe(js.ValueOf(expectKey)), key)
 		iterIndex++
 		return err
 	}))
@@ -111,7 +111,7 @@ func TestCursorPrimaryKey(t *testing.T) {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.PrimaryKey()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf(expectKey), key)
+		assert.Equal(t, safejs.Safe(js.ValueOf(expectKey)), key)
 		iterIndex++
 		return err
 	}))
@@ -144,7 +144,7 @@ func TestCursorAdvance(t *testing.T) {
 		expectKey := someKeyStoreData[iterIndex*2][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf(expectKey), key)
+		assert.Equal(t, safejs.Safe(js.ValueOf(expectKey)), key)
 		err = cursor.Advance(2)
 		assert.NoError(t, err)
 		iterIndex++
@@ -165,7 +165,7 @@ func TestCursorContinue(t *testing.T) {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf(expectKey), key)
+		assert.Equal(t, safejs.Safe(js.ValueOf(expectKey)), key)
 		err = cursor.Continue()
 		assert.NoError(t, err)
 		iterIndex++
@@ -186,14 +186,14 @@ func TestCursorContinueKey(t *testing.T) {
 		expectKey := someKeyStoreData[iterIndex*2][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf(expectKey), key)
+		assert.Equal(t, safejs.Safe(js.ValueOf(expectKey)), key)
 
 		nextIndex := (iterIndex + 1) * 2
 		if nextIndex >= len(someKeyStoreData) {
 			return ErrCursorStopIter
 		}
 		nextKey := someKeyStoreData[nextIndex][0]
-		err = cursor.ContinueKey(js.ValueOf(nextKey))
+		err = cursor.ContinueKey(safejs.Safe(js.ValueOf(nextKey)))
 		assert.NoError(t, err)
 		iterIndex++
 		return err
@@ -217,7 +217,7 @@ func TestCursorContinuePrimaryKey(t *testing.T) {
 		expectKey := getPrimaryKey(iterIndex * 2)
 		key, err := cursor.Key()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf(expectKey), key)
+		assert.Equal(t, safejs.Safe(js.ValueOf(expectKey)), key)
 
 		nextIndex := (iterIndex + 1) * 2
 		if nextIndex >= len(someKeyStoreData) {
@@ -225,7 +225,7 @@ func TestCursorContinuePrimaryKey(t *testing.T) {
 		}
 		nextKey := someKeyStoreData[nextIndex][0]
 		nextIndexKey := getPrimaryKey(nextIndex)
-		err = cursor.ContinuePrimaryKey(js.ValueOf(nextIndexKey), js.ValueOf(nextKey))
+		err = cursor.ContinuePrimaryKey(safejs.Safe(js.ValueOf(nextIndexKey)), safejs.Safe(js.ValueOf(nextKey)))
 		assert.NoError(t, err)
 		iterIndex++
 		return err
@@ -245,7 +245,7 @@ func TestCursorDelete(t *testing.T) {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf(expectKey), key)
+		assert.Equal(t, safejs.Safe(js.ValueOf(expectKey)), key)
 		_, err = cursor.Delete()
 		assert.NoError(t, err)
 		iterIndex++
@@ -280,8 +280,8 @@ func TestCursorUpdateAndValue(t *testing.T) {
 		expectKey := someKeyStoreData[iterIndex][0]
 		key, err := cursor.Key()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf(expectKey), key)
-		_, err = cursor.Update(js.ValueOf(iterIndex))
+		assert.Equal(t, safejs.Safe(js.ValueOf(expectKey)), key)
+		_, err = cursor.Update(safejs.Safe(js.ValueOf(iterIndex)))
 		assert.NoError(t, err)
 		iterIndex++
 		return err
@@ -301,7 +301,7 @@ func TestCursorUpdateAndValue(t *testing.T) {
 	assert.NoError(t, cursorReq.Iter(ctx, func(cursor *CursorWithValue) error {
 		value, err := cursor.Value()
 		assert.NoError(t, err)
-		assert.Equal(t, js.ValueOf(ix), value)
+		assert.Equal(t, safejs.Safe(js.ValueOf(ix)), value)
 		ix++
 		return err
 	}))

@@ -567,7 +567,7 @@ func TestObjectStoreOpenCursor(t *testing.T) {
 				err := req.Iter(ctx, func(cursor *CursorWithValue) error {
 					value, err := cursor.Value()
 					if assert.NoError(t, err) {
-						results = append(results, value)
+						results = append(results, safejs.Unsafe(value))
 						err = cursor.Continue()
 						return err
 					}
@@ -578,7 +578,7 @@ func TestObjectStoreOpenCursor(t *testing.T) {
 				err := req.Iter(ctx, func(cursor *Cursor) error {
 					key, err := cursor.Key()
 					if assert.NoError(t, err) {
-						results = append(results, key)
+						results = append(results, safejs.Unsafe(key))
 						return cursor.Continue()
 					}
 					return err
