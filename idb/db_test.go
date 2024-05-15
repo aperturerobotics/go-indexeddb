@@ -157,11 +157,11 @@ func TestDatabaseTransaction(t *testing.T) {
 			assert.NoError(t, err)
 			store1, err := txn.ObjectStore("store1")
 			assert.NoError(t, err)
-			_, err = store1.PutKey(js.ValueOf("key1"), js.ValueOf("value1"))
+			_, err = store1.PutKey(safejs.Safe(js.ValueOf("key1")), safejs.Safe(js.ValueOf("value1")))
 			assert.NoError(t, err)
 			store2, err := txn.ObjectStore("store2")
 			assert.NoError(t, err)
-			_, err = store2.PutKey(js.ValueOf("key2"), js.ValueOf("value2"))
+			_, err = store2.PutKey(safejs.Safe(js.ValueOf("key2")), safejs.Safe(js.ValueOf("value2")))
 			assert.NoError(t, err)
 
 			// verify 1 of the values is correct

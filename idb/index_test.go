@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
+	"github.com/hack-pad/safejs"
 )
 
 func TestIndexObjectStore(t *testing.T) {
@@ -15,7 +16,7 @@ func TestIndexObjectStore(t *testing.T) {
 	db := testDB(t, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(t, err)
-		_, err = store.CreateIndex("myindex", js.ValueOf("primary"), IndexOptions{})
+		_, err = store.CreateIndex("myindex", safejs.Safe(js.ValueOf("primary")), IndexOptions{})
 		assert.NoError(t, err)
 	})
 	txn, err := db.Transaction(TransactionReadWrite, "mystore")
@@ -35,7 +36,7 @@ func TestIndexName(t *testing.T) {
 	db := testDB(t, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(t, err)
-		_, err = store.CreateIndex("myindex", js.ValueOf("primary"), IndexOptions{})
+		_, err = store.CreateIndex("myindex", safejs.Safe(js.ValueOf("primary")), IndexOptions{})
 		assert.NoError(t, err)
 	})
 	txn, err := db.Transaction(TransactionReadWrite, "mystore")
@@ -55,7 +56,7 @@ func TestIndexKeyPath(t *testing.T) {
 	db := testDB(t, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(t, err)
-		_, err = store.CreateIndex("myindex", js.ValueOf("primary"), IndexOptions{})
+		_, err = store.CreateIndex("myindex", safejs.Safe(js.ValueOf("primary")), IndexOptions{})
 		assert.NoError(t, err)
 	})
 	txn, err := db.Transaction(TransactionReadWrite, "mystore")
@@ -75,7 +76,7 @@ func TestIndexMultiEntry(t *testing.T) {
 	db := testDB(t, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(t, err)
-		_, err = store.CreateIndex("myindex", js.ValueOf("primary"), IndexOptions{
+		_, err = store.CreateIndex("myindex", safejs.Safe(js.ValueOf("primary")), IndexOptions{
 			MultiEntry: true,
 		})
 		assert.NoError(t, err)
@@ -97,7 +98,7 @@ func TestIndexUnique(t *testing.T) {
 	db := testDB(t, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(t, err)
-		_, err = store.CreateIndex("myindex", js.ValueOf("primary"), IndexOptions{
+		_, err = store.CreateIndex("myindex", safejs.Safe(js.ValueOf("primary")), IndexOptions{
 			Unique: true,
 		})
 		assert.NoError(t, err)

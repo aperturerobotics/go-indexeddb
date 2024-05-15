@@ -110,7 +110,7 @@ func (o *ObjectStore) CountRange(keyRange *KeyRange) (*UintRequest, error) {
 }
 
 // CreateIndex creates a new index during a version upgrade, returning a new Index object in the connected database.
-func (o *ObjectStore) CreateIndex(name string, keyPath js.Value, options IndexOptions) (*Index, error) {
+func (o *ObjectStore) CreateIndex(name string, keyPath safejs.Value, options IndexOptions) (*Index, error) {
 	jsIndex, err := o.base.jsObjectStore.Call("createIndex", name, keyPath, map[string]interface{}{
 		"unique":     options.Unique,
 		"multiEntry": options.MultiEntry,
@@ -167,7 +167,7 @@ func (o *ObjectStore) Index(name string) (*Index, error) {
 }
 
 // Put returns a Request, and, in a separate thread, creates a structured clone of the value, and stores the cloned value in the object store. This is for updating existing records in an object store when the transaction's mode is readwrite.
-func (o *ObjectStore) Put(value js.Value) (*Request, error) {
+func (o *ObjectStore) Put(value safejs.Value) (*Request, error) {
 	reqValue, err := o.base.jsObjectStore.Call("put", value)
 	if err != nil {
 		return nil, tryAsDOMException(err)
@@ -176,7 +176,7 @@ func (o *ObjectStore) Put(value js.Value) (*Request, error) {
 }
 
 // PutKey is the same as Put, but includes the key to use to identify the record.
-func (o *ObjectStore) PutKey(key, value js.Value) (*Request, error) {
+func (o *ObjectStore) PutKey(key, value safejs.Value) (*Request, error) {
 	reqValue, err := o.base.jsObjectStore.Call("put", value, key)
 	if err != nil {
 		return nil, tryAsDOMException(err)

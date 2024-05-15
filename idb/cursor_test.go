@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
+	"github.com/hack-pad/safejs"
 )
 
 var (
@@ -26,7 +27,7 @@ func someKeyStore(tb testing.TB) (*ObjectStore, *Index) {
 	db := testDB(tb, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(tb, err)
-		_, err = store.CreateIndex("myindex", js.ValueOf("primary"), IndexOptions{})
+		_, err = store.CreateIndex("myindex", safejs.Safe(js.ValueOf("primary")), IndexOptions{})
 		assert.NoError(tb, err)
 	})
 	txn, err := db.Transaction(TransactionReadWrite, "mystore")

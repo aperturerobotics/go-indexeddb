@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
+	"github.com/hack-pad/safejs"
 )
 
 var (
@@ -32,7 +33,7 @@ func testRequest(t *testing.T) (*Transaction, *Request) {
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
-	req, err := store.PutKey(testRequestKey, js.ValueOf("value"))
+	req, err := store.PutKey(safejs.Safe(testRequestKey), safejs.Safe(js.ValueOf("value")))
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}

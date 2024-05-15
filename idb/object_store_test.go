@@ -17,7 +17,7 @@ func TestObjectStoreIndexNames(t *testing.T) {
 	db := testDB(t, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(t, err)
-		_, err = store.CreateIndex("myindex", js.ValueOf("indexKey"), IndexOptions{})
+		_, err = store.CreateIndex("myindex", safejs.Safe(js.ValueOf("indexKey")), IndexOptions{})
 		assert.NoError(t, err)
 	})
 	txn, err := db.Transaction(TransactionReadOnly, "mystore")
@@ -224,7 +224,7 @@ func TestObjectStoreCreateIndex(t *testing.T) {
 	testDB(t, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(t, err)
-		index, err := store.CreateIndex("myindex", js.ValueOf("primary"), IndexOptions{
+		index, err := store.CreateIndex("myindex", safejs.Safe(js.ValueOf("primary")), IndexOptions{
 			Unique:     true,
 			MultiEntry: true,
 		})
@@ -268,7 +268,7 @@ func TestObjectStoreDeleteIndex(t *testing.T) {
 	testDB(t, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(t, err)
-		_, err = store.CreateIndex("myindex", js.ValueOf("primary"), IndexOptions{})
+		_, err = store.CreateIndex("myindex", safejs.Safe(js.ValueOf("primary")), IndexOptions{})
 		assert.NoError(t, err)
 		err = store.DeleteIndex("myindex")
 		assert.NoError(t, err)
@@ -378,7 +378,7 @@ func TestObjectStoreIndex(t *testing.T) {
 	db := testDB(t, func(db *Database) {
 		store, err := db.CreateObjectStore("mystore", ObjectStoreOptions{})
 		assert.NoError(t, err)
-		_, err = store.CreateIndex("myindex", js.ValueOf("indexKey"), IndexOptions{})
+		_, err = store.CreateIndex("myindex", safejs.Safe(js.ValueOf("indexKey")), IndexOptions{})
 		assert.NoError(t, err)
 	})
 	txn, err := db.Transaction(TransactionReadWrite, "mystore")
@@ -405,10 +405,10 @@ func TestObjectStorePut(t *testing.T) {
 	assert.NoError(t, err)
 
 	ctx := context.Background()
-	req, err := store.Put(js.ValueOf(map[string]interface{}{
+	req, err := store.Put(safejs.Safe(js.ValueOf(map[string]interface{}{
 		"id":    "some id",
 		"value": "some value",
-	}))
+	})))
 	assert.NoError(t, err)
 	resultKey, err := req.Await(ctx)
 	assert.NoError(t, err)
@@ -427,7 +427,7 @@ func TestObjectStorePutKey(t *testing.T) {
 	assert.NoError(t, err)
 
 	ctx := context.Background()
-	req, err := store.PutKey(js.ValueOf("some id"), js.ValueOf("some value"))
+	req, err := store.PutKey(safejs.Safe(js.ValueOf("some id")), safejs.Safe(js.ValueOf("some value")))
 	assert.NoError(t, err)
 	resultKey, err := req.Await(ctx)
 	assert.NoError(t, err)
