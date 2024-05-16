@@ -73,9 +73,6 @@ type Cursor struct {
 }
 
 func wrapCursor(txn *Transaction, jsCursor safejs.Value) *Cursor {
-	if txn == nil {
-		txn = (*Transaction)(nil)
-	}
 	return &Cursor{
 		txn:      txn,
 		jsCursor: jsCursor,

@@ -88,6 +88,20 @@ func (r *Request) Err() (err error) {
 	return domExceptionAsError(jsErr)
 }
 
+// AwaitCursor awaits the iterator cursor and returns the value.
+//
+// returns nil if there are no more results.
+func (r *Request) AwaitCursor(ctx context.Context) (*Cursor, error) {
+	result, err := r.SafeAwait(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if result.IsNull() {
+		return nil, nil
+	}
+	return wrapCursor(r.txn, result), nil
+}
+
 // SafeAwait is Await but returns a safejs.Value.
 func (r *Request) SafeAwait(ctx context.Context) (safejs.Value, error) {
 	resultCh := make(chan safejs.Value, 1)
@@ -344,14 +358,13 @@ func (a *AckRequest) Await(ctx context.Context) error {
 
 func cursorIter(ctx context.Context, req *Request, iter func(*Cursor) error) error {
 	for {
-		jsCursor, err := req.SafeAwait(ctx)
+		cursor, err := req.AwaitCursor(ctx)
 		if err != nil {
 			return err
 		}
-		if jsCursor.IsNull() {
+		if cursor == nil {
 			return nil
 		}
-		cursor := wrapCursor(req.txn, jsCursor)
 		err = iter(cursor)
 		if err != nil {
 			if err == ErrCursorStopIter {
