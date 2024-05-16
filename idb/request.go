@@ -395,11 +395,7 @@ func (c *CursorRequest) Result() (*Cursor, error) {
 
 // Await waits for success or failure, then returns the results.
 func (c *CursorRequest) Await(ctx context.Context) (*Cursor, error) {
-	result, err := c.Request.Await(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return wrapCursor(c.txn, result), nil
+	return c.Request.AwaitCursor(ctx)
 }
 
 // CursorWithValueRequest is a Request that retrieves a CursorWithValue
