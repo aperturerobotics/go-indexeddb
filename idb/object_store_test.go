@@ -126,7 +126,7 @@ func TestObjectStoreAdd(t *testing.T) {
 	assert.NoError(t, addReq.Await(ctx))
 	result, err := getReq.Await(ctx)
 	assert.NoError(t, err)
-	assert.Equal(t, js.ValueOf("some id"), result)
+	assert.Equal(t, safejs.Safe(js.ValueOf("some id")), result)
 }
 
 func TestObjectStoreClear(t *testing.T) {
@@ -260,7 +260,7 @@ func TestObjectStoreDelete(t *testing.T) {
 	assert.NoError(t, err)
 	result, err := req.Await(context.Background())
 	assert.NoError(t, err)
-	assert.Equal(t, js.Undefined(), result)
+	assert.Equal(t, safejs.Safe(js.Undefined()), result)
 }
 
 func TestObjectStoreDeleteIndex(t *testing.T) {
@@ -323,7 +323,7 @@ func TestObjectStoreGet(t *testing.T) {
 				}
 				return store.Get(getKeyVal)
 			},
-			expectResult: js.ValueOf("some value"),
+			expectResult: safejs.Safe(js.ValueOf("some value")),
 		},
 		{
 			name: "get key",
@@ -337,7 +337,7 @@ func TestObjectStoreGet(t *testing.T) {
 				}
 				return store.GetKey(getKeyVal)
 			},
-			expectResult: js.ValueOf("some id"),
+			expectResult: safejs.Safe(js.ValueOf("some id")),
 		},
 	} {
 		tc := tc // keep loop-local copy of test case for parallel runs
@@ -412,7 +412,7 @@ func TestObjectStorePut(t *testing.T) {
 	assert.NoError(t, err)
 	resultKey, err := req.Await(ctx)
 	assert.NoError(t, err)
-	assert.Equal(t, js.ValueOf("some id"), resultKey)
+	assert.Equal(t, safejs.Safe(js.ValueOf("some id")), resultKey)
 }
 
 func TestObjectStorePutKey(t *testing.T) {
@@ -431,7 +431,7 @@ func TestObjectStorePutKey(t *testing.T) {
 	assert.NoError(t, err)
 	resultKey, err := req.Await(ctx)
 	assert.NoError(t, err)
-	assert.Equal(t, js.ValueOf("some id"), resultKey)
+	assert.Equal(t, safejs.Safe(js.ValueOf("some id")), resultKey)
 }
 
 func TestObjectStoreOpenCursor(t *testing.T) {

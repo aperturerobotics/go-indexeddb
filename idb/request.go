@@ -69,14 +69,9 @@ func (r *Request) Source() (objectStore *ObjectStore, index *Index, err error) {
 	return
 }
 
-func (r *Request) result() (safejs.Value, error) {
-	return r.jsRequest.Get("result")
-}
-
 // Result returns the result of the request. If the request failed and the result is not available, an error is returned.
-func (r *Request) Result() (js.Value, error) {
-	value, err := r.result()
-	return safejs.Unsafe(value), err
+func (r *Request) Result() (safejs.Value, error) {
+	return r.jsRequest.Get("result")
 }
 
 // Err returns an error in the event of an unsuccessful request, indicating what went wrong.
@@ -92,7 +87,7 @@ func (r *Request) Err() (err error) {
 //
 // returns nil if there are no more results.
 func (r *Request) AwaitCursor(ctx context.Context) (*Cursor, error) {
-	result, err := r.SafeAwait(ctx)
+	result, err := r.Await(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -102,8 +97,8 @@ func (r *Request) AwaitCursor(ctx context.Context) (*Cursor, error) {
 	return wrapCursor(r.txn, result), nil
 }
 
-// SafeAwait is Await but returns a safejs.Value.
-func (r *Request) SafeAwait(ctx context.Context) (safejs.Value, error) {
+// Await waits for success or failure, then returns the results.
+func (r *Request) Await(ctx context.Context) (safejs.Value, error) {
 	resultCh := make(chan safejs.Value, 1)
 	errCh := make(chan error, 1)
 
@@ -111,7 +106,7 @@ func (r *Request) SafeAwait(ctx context.Context) (safejs.Value, error) {
 	defer cancel()
 
 	err := r.Listen(ctx, func() {
-		result, err := r.result()
+		result, err := r.Result()
 		if err != nil {
 			errCh <- err
 		} else {
@@ -132,12 +127,6 @@ func (r *Request) SafeAwait(ctx context.Context) (safejs.Value, error) {
 	case <-ctx.Done():
 		return safejs.Null(), ctx.Err()
 	}
-}
-
-// Await waits for success or failure, then returns the results.
-func (r *Request) Await(ctx context.Context) (js.Value, error) {
-	result, err := r.SafeAwait(ctx)
-	return safejs.Unsafe(result), err
 }
 
 // ReadyState returns the state of the request. Every request starts in the pending state. The state changes to done when the request completes successfully or when an error occurs.
@@ -283,7 +272,7 @@ func newUintRequest(req *Request) *UintRequest {
 
 // Result returns the result of the request. If the request failed and the result is not available, an error is returned.
 func (u *UintRequest) Result() (uint, error) {
-	result, err := u.Request.result()
+	result, err := u.Request.Result()
 	if err != nil {
 		return 0, err
 	}
@@ -293,7 +282,7 @@ func (u *UintRequest) Result() (uint, error) {
 
 // Await waits for success or failure, then returns the results.
 func (u *UintRequest) Await(ctx context.Context) (uint, error) {
-	result, err := u.Request.SafeAwait(ctx)
+	result, err := u.Request.Await(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -312,7 +301,7 @@ func newArrayRequest(req *Request) *ArrayRequest {
 
 // Result returns the result of the request. If the request failed and the result is not available, an error is returned.
 func (a *ArrayRequest) Result() ([]js.Value, error) {
-	result, err := a.Request.result()
+	result, err := a.Request.Result()
 	if err != nil {
 		return nil, err
 	}
@@ -326,7 +315,7 @@ func (a *ArrayRequest) Result() ([]js.Value, error) {
 
 // Await waits for success or failure, then returns the results.
 func (a *ArrayRequest) Await(ctx context.Context) ([]js.Value, error) {
-	result, err := a.Request.SafeAwait(ctx)
+	result, err := a.Request.Await(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -352,7 +341,7 @@ func (a *AckRequest) Result() {} // no-op
 
 // Await waits for success or failure, then returns the results.
 func (a *AckRequest) Await(ctx context.Context) error {
-	_, err := a.Request.SafeAwait(ctx)
+	_, err := a.Request.Await(ctx)
 	return err
 }
 
@@ -392,14 +381,12 @@ func newCursorRequest(req *Request) *CursorRequest {
 
 // Iter invokes the callback when the request succeeds for each cursor iteration
 func (c *CursorRequest) Iter(ctx context.Context, iter func(*Cursor) error) error {
-	return cursorIter(ctx, c.Request, func(cursor *Cursor) error {
-		return iter(cursor)
-	})
+	return cursorIter(ctx, c.Request, iter)
 }
 
 // Result returns the result of the request. If the request failed and the result is not available, an error is returned.
 func (c *CursorRequest) Result() (*Cursor, error) {
-	result, err := c.Request.result()
+	result, err := c.Request.Result()
 	if err != nil {
 		return nil, err
 	}
@@ -408,7 +395,7 @@ func (c *CursorRequest) Result() (*Cursor, error) {
 
 // Await waits for success or failure, then returns the results.
 func (c *CursorRequest) Await(ctx context.Context) (*Cursor, error) {
-	result, err := c.Request.SafeAwait(ctx)
+	result, err := c.Request.Await(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -433,7 +420,7 @@ func (c *CursorWithValueRequest) Iter(ctx context.Context, iter func(*CursorWith
 
 // Result returns the result of the request. If the request failed and the result is not available, an error is returned.
 func (c *CursorWithValueRequest) Result() (*CursorWithValue, error) {
-	result, err := c.Request.result()
+	result, err := c.Request.Result()
 	if err != nil {
 		return nil, err
 	}
@@ -442,7 +429,7 @@ func (c *CursorWithValueRequest) Result() (*CursorWithValue, error) {
 
 // Await waits for success or failure, then returns the results.
 func (c *CursorWithValueRequest) Await(ctx context.Context) (*CursorWithValue, error) {
-	result, err := c.Request.SafeAwait(ctx)
+	result, err := c.Request.Await(ctx)
 	if err != nil {
 		return nil, err
 	}

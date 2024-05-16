@@ -15,7 +15,7 @@ import (
 )
 
 var (
-	testRequestKey = js.ValueOf("key")
+	testRequestKey = safejs.Safe(js.ValueOf("key"))
 )
 
 func testRequest(t *testing.T) (*Transaction, *Request) {
@@ -33,7 +33,7 @@ func testRequest(t *testing.T) (*Transaction, *Request) {
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}
-	req, err := store.PutKey(safejs.Safe(testRequestKey), safejs.Safe(js.ValueOf("value")))
+	req, err := store.PutKey(testRequestKey, safejs.Safe(js.ValueOf("value")))
 	if !assert.NoError(t, err) {
 		t.FailNow()
 	}

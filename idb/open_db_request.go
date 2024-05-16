@@ -59,7 +59,7 @@ func newOpenDBRequest(ctx context.Context, req *Request, upgrader Upgrader) (*Op
 }
 
 func openDBListenSuccess(req *Request) error {
-	jsDB, err := req.result()
+	jsDB, err := req.Result()
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func openDBListenSuccess(req *Request) error {
 
 func openDBUpgradeNeeded(req *Request, upgrader Upgrader, args []safejs.Value) error {
 	event := args[0]
-	jsDatabase, err := req.result()
+	jsDatabase, err := req.Result()
 	if err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func openDBUpgradeNeeded(req *Request, upgrader Upgrader, args []safejs.Value) e
 
 // Result returns the result of the request. If the request failed and the result is not available, an error is returned.
 func (o *OpenDBRequest) Result() (*Database, error) {
-	db, err := o.Request.result()
+	db, err := o.Request.Result()
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func (o *OpenDBRequest) Result() (*Database, error) {
 
 // Await waits for success or failure, then returns the results.
 func (o *OpenDBRequest) Await(ctx context.Context) (*Database, error) {
-	db, err := o.Request.SafeAwait(ctx)
+	db, err := o.Request.Await(ctx)
 	if err != nil {
 		return nil, err
 	}
