@@ -11,20 +11,17 @@ import (
 /*
 RetryTxn retries the function with a new transaction if the txn finishes prematurely.
 
-IndexedDB transactions automatically commit when all outstanding requests
-have been satisfied. Go WebAssembly will background a Goroutine leading to
-IndexedDB transactions completing earlier than expected, leading to errors
-with a suffix "The transaction has finished." when further operations are
-attempted on the completed transaction.
+IndexedDB transactions automatically commit when all outstanding requests have
+been satisfied. When a Goroutine is suspended due to a select statement or other
+context switching, the IndexedDB transation commits automatically, leading to
+errors with a suffix "The transaction has finished."
 
 See: https://github.com/w3c/IndexedDB/issues/34 for more details.
 
 RetryTxn is a mechanism that automatically re-creates the transaction and
 retries the operation whenever we encounter this specific error. This
 ensures that operations can continue even if the transaction has been
-automatically committed. We will wrap all transaction operations within a
-retry logic that detects the "The transaction has finished." error and
-retries the operation with a new transaction.
+automatically committed.
 */
 func RetryTxn(
 	ctx context.Context,
