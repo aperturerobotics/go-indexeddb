@@ -173,7 +173,7 @@ func TestDatabaseTransaction(t *testing.T) {
 			assert.NoError(t, txn.Await(ctx))
 			result, err := req.Result()
 			assert.NoError(t, err)
-			assert.Equal(t, []js.Value{js.ValueOf("key1")}, result)
+			assert.Equal(t, []safejs.Value{safejs.Safe(js.ValueOf("key1"))}, result)
 		})
 	}
 }

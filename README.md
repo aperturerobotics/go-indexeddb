@@ -24,8 +24,11 @@ This package is available at **github.com/aperturerobotics/go-indexeddb**.
 Summary of the packages provided by this module:
 
 - [`idb`][idb-pkg]: Package `idb` provides a low-level Go driver with type-safe bindings to IndexedDB in Wasm programs.
+- [`durable`][durable-pkg]: Package `durable` provides a workaround for [transacations expiring].
 
 [idb-pkg]: https://pkg.go.dev/github.com/aperturerobotics/go-indexeddb/idb?GOOS=js
+[durable-pkg]: https://pkg.go.dev/github.com/aperturerobotics/go-indexeddb/durable?GOOS=js
+[transactions expiring]: #Transactions-Expiring
 
 ## Usage
 

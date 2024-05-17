@@ -300,28 +300,28 @@ func newArrayRequest(req *Request) *ArrayRequest {
 }
 
 // Result returns the result of the request. If the request failed and the result is not available, an error is returned.
-func (a *ArrayRequest) Result() ([]js.Value, error) {
+func (a *ArrayRequest) Result() ([]safejs.Value, error) {
 	result, err := a.Request.Result()
 	if err != nil {
 		return nil, err
 	}
-	var values []js.Value
+	var values []safejs.Value
 	err = iterArray(result, func(i int, value safejs.Value) (bool, error) {
-		values = append(values, safejs.Unsafe(value))
+		values = append(values, value)
 		return true, nil
 	})
 	return values, err
 }
 
 // Await waits for success or failure, then returns the results.
-func (a *ArrayRequest) Await(ctx context.Context) ([]js.Value, error) {
+func (a *ArrayRequest) Await(ctx context.Context) ([]safejs.Value, error) {
 	result, err := a.Request.Await(ctx)
 	if err != nil {
 		return nil, err
 	}
-	var values []js.Value
+	var values []safejs.Value
 	err = iterArray(result, func(i int, value safejs.Value) (bool, error) {
-		values = append(values, safejs.Unsafe(value))
+		values = append(values, value)
 		return true, nil
 	})
 	return values, err

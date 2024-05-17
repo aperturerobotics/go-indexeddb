@@ -158,7 +158,7 @@ func TestObjectStoreClear(t *testing.T) {
 	assert.NoError(t, clearReq.Await(ctx))
 	result, err := getReq.Await(ctx)
 	assert.NoError(t, err)
-	assert.Equal(t, []js.Value(nil), result)
+	assert.Equal(t, []safejs.Value(nil), result)
 }
 
 func TestObjectStoreCount(t *testing.T) {
@@ -296,7 +296,7 @@ func TestObjectStoreGet(t *testing.T) {
 			getFn: func(store *ObjectStore) (interface{}, error) {
 				return store.GetAllKeys()
 			},
-			expectResult: []js.Value{js.ValueOf("some id"), js.ValueOf("some other id")},
+			expectResult: []safejs.Value{safejs.Safe(js.ValueOf("some id")), safejs.Safe(js.ValueOf("some other id"))},
 		},
 		{
 			name: "get all keys query",
@@ -309,7 +309,7 @@ func TestObjectStoreGet(t *testing.T) {
 				assert.NoError(t, err)
 				return store.GetAllKeysRange(keyRange, 10)
 			},
-			expectResult: []js.Value{js.ValueOf("some id")},
+			expectResult: []safejs.Value{safejs.Safe(js.ValueOf("some id"))},
 		},
 		{
 			name: "get",
