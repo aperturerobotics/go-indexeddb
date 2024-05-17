@@ -64,6 +64,42 @@ func (dt *DurableTransaction) GetObjectStore(name string) (*DurableObjectStore, 
 	return store, nil
 }
 
+// Abort attempts to abort the transaction (undoing the ops) if one is active.
+// no-op if the transaction was already committed
+// Returns if the abort request did anything and any error.
+// NOTE: the transaction will commit automatically if the goroutine is backgrounded.
+func (dt *DurableTransaction) Abort() (bool, error) {
+	if dt.txn == nil {
+		return false, nil
+	}
+
+	err := dt.txn.Abort()
+	dt.txn = nil
+	if err == nil {
+		return true, nil
+	}
+	if idb.IsTxnFinishedErr(err) {
+		return false, nil
+	}
+	return false, err
+}
+
+// Commit attempts to commit the transaction if one is active.
+// no-op if the transaction was already committed
+// NOTE: the transaction will commit automatically if the goroutine is backgrounded.
+func (dt *DurableTransaction) Commit() error {
+	if dt.txn == nil {
+		return nil
+	}
+
+	err := dt.txn.Commit()
+	dt.txn = nil
+	if idb.IsTxnFinishedErr(err) {
+		err = nil
+	}
+	return err
+}
+
 // ensureTransaction ensures dt.txn is not nil.
 func (dt *DurableTransaction) ensureTransaction() error {
 	if dt.txn != nil {
