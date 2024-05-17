@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
+	"github.com/hack-pad/safejs"
 )
 
 func TestTransactionDatabase(t *testing.T) {
@@ -75,7 +76,7 @@ func TestTransactionAbortErr(t *testing.T) {
 	assert.NoError(t, err)
 	store, err := txn.ObjectStore("mystore")
 	assert.NoError(t, err)
-	_, err = store.AddKey(js.ValueOf("some id"), js.ValueOf(nil))
+	_, err = store.AddKey(safejs.Safe(js.ValueOf("some id")), safejs.Safe(js.ValueOf(nil)))
 	assert.NoError(t, err)
 
 	resultErr := txn.listenFinished()

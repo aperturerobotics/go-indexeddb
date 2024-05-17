@@ -32,19 +32,16 @@ func RetryTxn(
     prematurely.
 
     IndexedDB transactions automatically commit when all outstanding requests
-    have been satisfied. Go WebAssembly will background a Goroutine leading to
-    IndexedDB transactions completing earlier than expected, leading to errors
-    with a suffix "The transaction has finished." when further operations are
-    attempted on the completed transaction.
+    have been satisfied. When a Goroutine is suspended due to a select statement
+    or other context switching, the IndexedDB transation commits automatically,
+    leading to errors with a suffix "The transaction has finished."
 
     See: https://github.com/w3c/IndexedDB/issues/34 for more details.
 
     RetryTxn is a mechanism that automatically re-creates the transaction
     and retries the operation whenever we encounter this specific error.
     This ensures that operations can continue even if the transaction has been
-    automatically committed. We will wrap all transaction operations within
-    a retry logic that detects the "The transaction has finished." error and
-    retries the operation with a new transaction.
+    automatically committed.
 
 
 TYPES
@@ -231,6 +228,107 @@ func (db *Database) TransactionWithOptions(options TransactionOptions, objectSto
 func (db *Database) Version() (uint, error)
     Version returns the version of the connected database.
 
+type DurableObjectStore struct {
+	// Has unexported fields.
+}
+    DurableObjectStore represents an object store that automatically retries on
+    failure.
+
+func (dos *DurableObjectStore) Add(value safejs.Value) (*AckRequest, error)
+    Add returns an AckRequest, and, in a separate thread, creates a structured
+    clone of the value, and stores the cloned value in the object store. This is
+    for adding new records to an object store.
+
+func (dos *DurableObjectStore) AddKey(key, value safejs.Value) (*AckRequest, error)
+    AddKey is the same as Add, but includes the key to use to identify the
+    record.
+
+func (dos *DurableObjectStore) Clear() (*AckRequest, error)
+    Clear returns an AckRequest, then clears this object store in a separate
+    thread. This is for deleting all current records out of an object store.
+
+func (dos *DurableObjectStore) Count() (*UintRequest, error)
+    Count returns a UintRequest, and, in a separate thread, returns the total
+    number of records in the store.
+
+func (dos *DurableObjectStore) CountKey(key safejs.Value) (*UintRequest, error)
+    CountKey returns a UintRequest, and, in a separate thread, returns the total
+    number of records that match the provided key.
+
+func (dos *DurableObjectStore) CountRange(keyRange *KeyRange) (*UintRequest, error)
+    CountRange returns a UintRequest, and, in a separate thread, returns the
+    total number of records that match the provided KeyRange.
+
+func (dos *DurableObjectStore) Delete(key safejs.Value) (*AckRequest, error)
+    Delete returns an AckRequest, and, in a separate thread, deletes the store
+    object selected by the specified key. This is for deleting individual
+    records out of an object store.
+
+func (dos *DurableObjectStore) Get(key safejs.Value) (*Request, error)
+    Get returns a Request, and, in a separate thread, returns the objects
+    selected by the specified key. This is for retrieving specific records from
+    an object store.
+
+func (dos *DurableObjectStore) GetAllKeys() (*ArrayRequest, error)
+    GetAllKeys returns an ArrayRequest that retrieves record keys for all
+    objects in the object store.
+
+func (dos *DurableObjectStore) GetAllKeysRange(query *KeyRange, maxCount uint) (*ArrayRequest, error)
+    GetAllKeysRange returns an ArrayRequest that retrieves record keys for all
+    objects in the object store matching the specified query. If maxCount is 0,
+    retrieves all objects matching the query.
+
+func (dos *DurableObjectStore) GetKey(value safejs.Value) (*Request, error)
+    GetKey returns a Request, and, in a separate thread retrieves and returns
+    the record key for the object matching the specified parameter.
+
+func (dos *DurableObjectStore) OpenCursor(direction CursorDirection) (*CursorWithValueRequest, error)
+    OpenCursor returns a CursorWithValueRequest, and, in a separate thread,
+    returns a new CursorWithValue. Used for iterating through an object store by
+    primary key with a cursor.
+
+func (dos *DurableObjectStore) OpenCursorKey(key safejs.Value, direction CursorDirection) (*CursorWithValueRequest, error)
+    OpenCursorKey is the same as OpenCursor, but opens a cursor over the given
+    key instead.
+
+func (dos *DurableObjectStore) OpenCursorRange(keyRange *KeyRange, direction CursorDirection) (*CursorWithValueRequest, error)
+    OpenCursorRange is the same as OpenCursor, but opens a cursor over the given
+    range instead.
+
+func (dos *DurableObjectStore) OpenKeyCursor(direction CursorDirection) (*CursorRequest, error)
+    OpenKeyCursor returns a CursorRequest, and, in a separate thread, returns a
+    new Cursor. Used for iterating through all keys in an object store.
+
+func (dos *DurableObjectStore) OpenKeyCursorKey(key safejs.Value, direction CursorDirection) (*CursorRequest, error)
+    OpenKeyCursorKey is the same as OpenKeyCursor, but opens a cursor over the
+    given key instead.
+
+func (dos *DurableObjectStore) OpenKeyCursorRange(keyRange *KeyRange, direction CursorDirection) (*CursorRequest, error)
+    OpenKeyCursorRange is the same as OpenKeyCursor, but opens a cursor over the
+    given key range instead.
+
+func (dos *DurableObjectStore) Put(value safejs.Value) (*Request, error)
+    Put returns a Request, and, in a separate thread, creates a structured clone
+    of the value, and stores the cloned value in the object store. This is for
+    updating existing records in an object store when the transaction's mode is
+    readwrite.
+
+func (dos *DurableObjectStore) PutKey(key, value safejs.Value) (*Request, error)
+    PutKey is the same as Put, but includes the key to use to identify the
+    record.
+
+type DurableTransaction struct {
+	// Has unexported fields.
+}
+    DurableTransaction represents a transaction that automatically retries on
+    failure.
+
+func NewDurableTransaction(db *Database, txnMode TransactionMode, objectStoreNames ...string) (*DurableTransaction, error)
+    NewDurableTransaction creates a new DurableTransaction.
+
+func (dt *DurableTransaction) GetObjectStore(name string) (*DurableObjectStore, error)
+    GetObjectStore returns the DurableObjectStore for the given name.
+
 type Factory struct {
 	// Has unexported fields.
 }
@@ -388,12 +486,12 @@ type ObjectStore struct {
     object store are sorted according to their keys. This sorting enables fast
     insertion, look-up, and ordered retrieval.
 
-func (o *ObjectStore) Add(value js.Value) (*AckRequest, error)
+func (o *ObjectStore) Add(value safejs.Value) (*AckRequest, error)
     Add returns an AckRequest, and, in a separate thread, creates a structured
     clone of the value, and stores the cloned value in the object store. This is
     for adding new records to an object store.
 
-func (o *ObjectStore) AddKey(key, value js.Value) (*AckRequest, error)
+func (o *ObjectStore) AddKey(key, value safejs.Value) (*AckRequest, error)
     AddKey is the same as Add, but includes the key to use to identify the
     record.
 
@@ -421,7 +519,7 @@ func (o *ObjectStore) CreateIndex(name string, keyPath safejs.Value, options Ind
     CreateIndex creates a new index during a version upgrade, returning a new
     Index object in the connected database.
 
-func (o *ObjectStore) Delete(key js.Value) (*AckRequest, error)
+func (o *ObjectStore) Delete(key safejs.Value) (*AckRequest, error)
     Delete returns an AckRequest, and, in a separate thread, deletes the store
     object selected by the specified key. This is for deleting individual
     records out of an object store.

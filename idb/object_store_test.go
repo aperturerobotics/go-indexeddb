@@ -114,9 +114,9 @@ func TestObjectStoreAdd(t *testing.T) {
 	store, err := txn.ObjectStore("mystore")
 	assert.NoError(t, err)
 
-	addReq, err := store.Add(js.ValueOf(map[string]interface{}{
+	addReq, err := store.Add(safejs.Safe(js.ValueOf(map[string]interface{}{
 		"id": "some id",
-	}))
+	})))
 	assert.NoError(t, err)
 	getVal, err := safejs.ValueOf("some id")
 	assert.NoError(t, err)
@@ -141,7 +141,7 @@ func TestObjectStoreClear(t *testing.T) {
 		assert.NoError(t, err)
 		store, err := txn.ObjectStore("mystore")
 		assert.NoError(t, err)
-		_, err = store.AddKey(js.ValueOf("some key"), js.ValueOf("some value"))
+		_, err = store.AddKey(safejs.Safe(js.ValueOf("some key")), safejs.Safe(js.ValueOf("some value")))
 		assert.NoError(t, err)
 		assert.NoError(t, txn.Await(ctx))
 	}
@@ -205,7 +205,7 @@ func TestObjectStoreCount(t *testing.T) {
 			store, err := txn.ObjectStore("mystore")
 			assert.NoError(t, err)
 
-			_, err = store.AddKey(js.ValueOf("some key"), js.ValueOf("some value"))
+			_, err = store.AddKey(safejs.Safe(js.ValueOf("some key")), safejs.Safe(js.ValueOf("some value")))
 			assert.NoError(t, err)
 
 			ctx := context.Background()
@@ -249,10 +249,10 @@ func TestObjectStoreDelete(t *testing.T) {
 	assert.NoError(t, err)
 	store, err := txn.ObjectStore("mystore")
 	assert.NoError(t, err)
-	_, err = store.AddKey(js.ValueOf("some key"), js.ValueOf("some value"))
+	_, err = store.AddKey(safejs.Safe(js.ValueOf("some key")), safejs.Safe(js.ValueOf("some value")))
 	assert.NoError(t, err)
 
-	_, err = store.Delete(js.ValueOf("some key"))
+	_, err = store.Delete(safejs.Safe(js.ValueOf("some key")))
 	assert.NoError(t, err)
 	getKeyVal, err := safejs.ValueOf("some key")
 	assert.NoError(t, err)
@@ -352,7 +352,7 @@ func TestObjectStoreGet(t *testing.T) {
 			store, err := txn.ObjectStore("mystore")
 			assert.NoError(t, err)
 			for key, value := range tc.keys {
-				_, err := store.AddKey(js.ValueOf(key), js.ValueOf(value))
+				_, err := store.AddKey(safejs.Safe(js.ValueOf(key)), safejs.Safe(js.ValueOf(value)))
 				assert.NoError(t, err)
 			}
 			req, err := tc.getFn(store)
@@ -554,7 +554,7 @@ func TestObjectStoreOpenCursor(t *testing.T) {
 			store, err := txn.ObjectStore("mystore")
 			assert.NoError(t, err)
 			for key, value := range tc.keys {
-				_, err = store.AddKey(js.ValueOf(key), js.ValueOf(value))
+				_, err = store.AddKey(safejs.Safe(js.ValueOf(key)), safejs.Safe(js.ValueOf(value)))
 				assert.NoError(t, err)
 			}
 

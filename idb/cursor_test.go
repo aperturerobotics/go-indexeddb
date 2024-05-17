@@ -39,7 +39,7 @@ func someKeyStore(tb testing.TB) (*ObjectStore, *Index) {
 
 	for _, object := range someKeyStoreData {
 		key, value := object[0], object[1]
-		_, err := store.AddKey(js.ValueOf(key), js.ValueOf(value))
+		_, err := store.AddKey(safejs.Safe(js.ValueOf(key)), safejs.Safe(js.ValueOf(value)))
 		assert.NoError(tb, err)
 	}
 	return store, index

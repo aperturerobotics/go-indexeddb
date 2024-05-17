@@ -9,6 +9,7 @@ import (
 	"syscall/js"
 
 	"github.com/aperturerobotics/go-indexeddb/idb"
+	"github.com/hack-pad/safejs"
 )
 
 var (
@@ -22,7 +23,7 @@ var (
 
 func Example() {
 	ctx := context.Background()
-	
+
 	// Create the 'library' database, then create a 'books' object store during setup.
 	// The setup func can also upgrade the database from older versions.
 	openRequest, _ := idb.Global().Open(ctx, "library", 1, func(db *idb.Database, oldVersion, newVersion uint) error {
@@ -35,7 +36,7 @@ func Example() {
 		txn, _ := db.Transaction(idb.TransactionReadWrite, "books")
 		store, _ := txn.ObjectStore("books")
 		for _, bookTitle := range Books {
-			store.Add(js.ValueOf(bookTitle))
+			store.Add(safejs.Safe(js.ValueOf(bookTitle)))
 		}
 		txn.Await(ctx)
 	}

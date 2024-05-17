@@ -65,7 +65,7 @@ func (o *ObjectStore) AutoIncrement() (bool, error) {
 }
 
 // Add returns an AckRequest, and, in a separate thread, creates a structured clone of the value, and stores the cloned value in the object store. This is for adding new records to an object store.
-func (o *ObjectStore) Add(value js.Value) (*AckRequest, error) {
+func (o *ObjectStore) Add(value safejs.Value) (*AckRequest, error) {
 	reqValue, err := o.base.jsObjectStore.Call("add", value)
 	if err != nil {
 		return nil, tryAsDOMException(err)
@@ -75,7 +75,7 @@ func (o *ObjectStore) Add(value js.Value) (*AckRequest, error) {
 }
 
 // AddKey is the same as Add, but includes the key to use to identify the record.
-func (o *ObjectStore) AddKey(key, value js.Value) (*AckRequest, error) {
+func (o *ObjectStore) AddKey(key, value safejs.Value) (*AckRequest, error) {
 	reqValue, err := o.base.jsObjectStore.Call("add", value, key)
 	if err != nil {
 		return nil, tryAsDOMException(err)
@@ -122,7 +122,7 @@ func (o *ObjectStore) CreateIndex(name string, keyPath safejs.Value, options Ind
 }
 
 // Delete returns an AckRequest, and, in a separate thread, deletes the store object selected by the specified key. This is for deleting individual records out of an object store.
-func (o *ObjectStore) Delete(key js.Value) (*AckRequest, error) {
+func (o *ObjectStore) Delete(key safejs.Value) (*AckRequest, error) {
 	reqValue, err := o.base.jsObjectStore.Call("delete", key)
 	if err != nil {
 		return nil, tryAsDOMException(err)

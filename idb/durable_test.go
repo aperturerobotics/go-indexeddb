@@ -70,3 +70,76 @@ func TestIsTxnFinishedErr(t *testing.T) {
 	assert.Equal(t, false, IsTxnFinishedErr(errors.New("some error")))
 	assert.Equal(t, true, IsTxnFinishedErr(errors.New("The transaction has finished.")))
 }
+func TestDurableTransaction(t *testing.T) {
+	t.Parallel()
+	const storeName = "mystore"
+	db := testDB(t, func(db *Database) {
+		_, err := db.CreateObjectStore(storeName, ObjectStoreOptions{})
+		assert.NoError(t, err)
+	})
+
+	txn, err := NewDurableTransaction(db, TransactionReadWrite, storeName)
+	assert.NoError(t, err)
+
+	store, err := txn.GetObjectStore(storeName)
+	assert.NoError(t, err)
+	assert.NotEqual(t, store, nil)
+
+	_, err = txn.GetObjectStore("invalid")
+	assert.Error(t, err)
+}
+
+func TestDurableObjectStore(t *testing.T) {
+	t.Parallel()
+	const storeName = "mystore"
+	db := testDB(t, func(db *Database) {
+		_, err := db.CreateObjectStore(storeName, ObjectStoreOptions{})
+		assert.NoError(t, err)
+	})
+
+	txn, err := NewDurableTransaction(db, TransactionReadWrite, storeName)
+	assert.NoError(t, err)
+
+	store, err := txn.GetObjectStore(storeName)
+	assert.NoError(t, err)
+
+	t.Run("AddKey", func(t *testing.T) {
+		req, err := store.AddKey(safejs.Safe(js.ValueOf("key")), safejs.Safe(js.ValueOf("value")))
+		assert.NoError(t, err)
+		assert.NoError(t, req.Await(context.Background()))
+	})
+
+	t.Run("Clear", func(t *testing.T) {
+		req, err := store.Clear()
+		assert.NoError(t, err)
+		assert.NoError(t, req.Await(context.Background()))
+	})
+
+	t.Run("Count", func(t *testing.T) {
+		req, err := store.Count()
+		assert.NoError(t, err)
+		count, err := req.Await(context.Background())
+		assert.NoError(t, err)
+		assert.Equal(t, uint(0), count)
+	})
+
+	t.Run("Delete", func(t *testing.T) {
+		req, err := store.Delete(safejs.Safe(js.ValueOf("key")))
+		assert.NoError(t, err)
+		assert.NoError(t, req.Await(context.Background()))
+	})
+
+	t.Run("Get", func(t *testing.T) {
+		req, err := store.Get(safejs.Safe(js.ValueOf("key")))
+		assert.NoError(t, err)
+		_, err = req.Await(context.Background())
+		assert.NoError(t, err)
+	})
+
+	t.Run("PutKey", func(t *testing.T) {
+		req, err := store.PutKey(safejs.Safe(js.ValueOf("key")), safejs.Safe(js.ValueOf("value")))
+		assert.NoError(t, err)
+		_, err = req.Await(context.Background())
+		assert.NoError(t, err)
+	})
+}
