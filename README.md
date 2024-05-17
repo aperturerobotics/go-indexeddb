@@ -70,6 +70,32 @@ This package can be tested in a browser environment using [`wasmbrowsertest`](ht
 
 This will compile the tests to WebAssembly and run them in a headless browser environment.
 
+## Transactions Expiring
+
+IndexedDB transactions will expire if inactive for a short period of time, or if
+the Go code becomes inactive (such as when waiting for a select statement). After
+the transaction expires, all subsequent requests will panic or return an error
+with the message "transaction is not active."
+
+This issue occurs frequently with the Go implementation of the IndexedDB client in 
+this library because the Go WebAssembly (Wasm) runtime frequently unwinds the stack 
+to the event loop when switching goroutines. Additionally, the code may panic if 
+the underlying JavaScript code throws any errors.
+
+To mitigate these issues, this library provides a wrapper around the IndexedDB
+transaction. After constructing a `Database`, call `NewDurableTransaction(db, scope, mode)`
+instead of `Transaction`. If the transaction becomes inactive, it will automatically
+restart the transaction. It will also handle any panics from the calls.
+
+When a transaction becomes inactive it will also commit the changes made up to that
+point. Calling the "abort" method will attempt to "roll back" the changes made
+by the transaction. However, this is a relatively weak transaction mechanism and
+should not be relied upon in the same way as traditional transaction systems
+(such as those in BoltDB or similar databases).
+
+Reference:
+https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB
+
 ## Upstream
 
 This package is a fork of [github.com/hack-pad/go-indexeddb](https://github.com/hack-pad/go-indexeddb).
