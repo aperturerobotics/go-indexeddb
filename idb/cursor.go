@@ -124,6 +124,9 @@ func (c *Cursor) Request() (*Request, error) {
 
 // Unwrap returns the underlying JavaScript cursor object.
 func (c *Cursor) Unwrap() safejs.Value {
+	if c == nil {
+		return safejs.Null()
+	}
 	return c.jsCursor
 }
 
