@@ -398,6 +398,11 @@ func (c *CursorRequest) Await(ctx context.Context) (*Cursor, error) {
 	return c.Request.AwaitCursor(ctx)
 }
 
+// Unwrap returns the underlying JavaScript request object.
+func (c *CursorRequest) Unwrap() safejs.Value {
+	return c.Request.jsRequest
+}
+
 // CursorWithValueRequest is a Request that retrieves a CursorWithValue
 type CursorWithValueRequest struct {
 	*Request

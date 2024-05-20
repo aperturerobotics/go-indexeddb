@@ -122,6 +122,11 @@ func (c *Cursor) Request() (*Request, error) {
 	return wrapRequest(c.txn, reqValue), nil
 }
 
+// Unwrap returns the underlying JavaScript cursor object.
+func (c *Cursor) Unwrap() safejs.Value {
+	return c.jsCursor
+}
+
 // Advance sets the number of times a cursor should move its position forward.
 func (c *Cursor) Advance(count uint) error {
 	c.iterated = true
@@ -185,4 +190,9 @@ func wrapCursorWithValue(txn *Transaction, jsCursor safejs.Value) *CursorWithVal
 // Value returns the value of the current cursor
 func (c *CursorWithValue) Value() (safejs.Value, error) {
 	return c.jsCursor.Get("value")
+}
+
+// Unwrap returns the underlying JavaScript cursor object.
+func (c *CursorWithValue) Unwrap() safejs.Value {
+	return c.jsCursor
 }
