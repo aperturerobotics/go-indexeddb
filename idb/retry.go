@@ -34,6 +34,9 @@ func RetryTxn(
 	for {
 		txn, err := db.Transaction(txnMode, objectStoreName, objectStoreNames...)
 		if err != nil {
+			if IsTxnFinishedErr(err) {
+				continue
+			}
 			return err
 		}
 
