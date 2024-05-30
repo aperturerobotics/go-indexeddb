@@ -65,8 +65,14 @@ func RetryTxn(
 // IsTxnFinishedErr checks if an error corresponds to a transaction finishing.
 // see RetryTxn for details
 func IsTxnFinishedErr(err error) bool {
-	if err == nil {
+	switch {
+	case err == nil:
+		return false
+	case strings.HasSuffix(err.Error(), "The transaction has finished."):
+		return true
+	case strings.HasSuffix(err.Error(), "The database connection is closing."):
+		return true
+	default:
 		return false
 	}
-	return strings.HasSuffix(err.Error(), "The transaction has finished.")
 }
