@@ -5,7 +5,7 @@
 
 [reference-badge]: https://pkg.go.dev/badge/github.com/aperturerobotics/go-indexeddb/idb.svg
 [ci-badge]: https://github.com/aperturerobotics/go-indexeddb/actions/workflows/tests.yml/badge.svg
-[reference]: https://pkg.go.dev/github.com/aperturerobotics/go-indexeddb/idb
+[reference]: https://pkg.go.dev/github.com/aperturerobotics/go-indexeddb/idb?GOOS=js
 [ci-workflow]: https://github.com/aperturerobotics/go-indexeddb/actions/workflows/tests.yml
 
 **go-indexeddb** is a low-level Go driver that provides type-safe bindings to IndexedDB in Wasm programs. The primary focus is to align with the IndexedDB spec, followed by ease of use.
@@ -15,7 +15,6 @@
 [IndexedDB]: https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
 
 See the [reference][] for full documentation and examples.
-
 
 This package is available at **github.com/aperturerobotics/go-indexeddb**.
 
