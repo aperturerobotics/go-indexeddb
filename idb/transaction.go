@@ -156,8 +156,8 @@ func (t *Transaction) Err() error {
 
 // Abort rolls back all the changes to objects in the database associated with this transaction.
 func (t *Transaction) Abort() error {
-	_, err := t.jsTransaction.Call("abort")
-	return tryAsDOMException(err)
+	_, err := call(t.jsTransaction, "abort")
+	return err
 }
 
 // Mode returns the mode for isolating access to data in the object stores that are in the scope of the transaction. The default value is TransactionReadOnly.
@@ -184,9 +184,9 @@ func (t *Transaction) ObjectStore(name string) (*ObjectStore, error) {
 	if store, ok := t.objectStores[name]; ok {
 		return store, nil
 	}
-	jsObjectStore, err := t.jsTransaction.Call("objectStore", name)
+	jsObjectStore, err := call(t.jsTransaction, "objectStore", name)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	store := wrapObjectStore(t, jsObjectStore)
 	t.objectStores[name] = store
@@ -199,8 +199,8 @@ func (t *Transaction) Commit() error {
 		return nil
 	}
 
-	_, err := t.jsTransaction.Call("commit")
-	return tryAsDOMException(err)
+	_, err := call(t.jsTransaction, "commit")
+	return err
 }
 
 // Await waits for success or failure, then returns the results.
@@ -208,7 +208,7 @@ func (t *Transaction) Await(ctx context.Context) error {
 	resultErr := t.listenFinished()
 	select {
 	case err := <-resultErr:
-		return tryAsDOMException(err)
+		return err
 	case <-ctx.Done():
 		return ctx.Err()
 	}
@@ -294,8 +294,5 @@ func (t *Transaction) addEventListener(
 		return err
 	}
 	_, err = t.jsTransaction.Call(addEventListener, t.db.callStrings.Value(eventName), jsFunc)
-	if err != nil {
-		return tryAsDOMException(err)
-	}
-	return nil
+	return err
 }

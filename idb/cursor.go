@@ -133,36 +133,36 @@ func (c *Cursor) Unwrap() safejs.Value {
 // Advance sets the number of times a cursor should move its position forward.
 func (c *Cursor) Advance(count uint) error {
 	c.iterated = true
-	_, err := c.jsCursor.Call("advance", count)
-	return tryAsDOMException(err)
+	_, err := call(c.jsCursor, "advance", count)
+	return err
 }
 
 // Continue advances the cursor to the next position along its direction.
 func (c *Cursor) Continue() error {
 	c.iterated = true
-	_, err := c.jsCursor.Call("continue")
-	return tryAsDOMException(err)
+	_, err := call(c.jsCursor, "continue")
+	return err
 }
 
 // ContinueKey advances the cursor to the next position along its direction.
 func (c *Cursor) ContinueKey(key safejs.Value) error {
 	c.iterated = true
-	_, err := c.jsCursor.Call("continue", key)
-	return tryAsDOMException(err)
+	_, err := call(c.jsCursor, "continue", key)
+	return err
 }
 
 // ContinuePrimaryKey sets the cursor to the given index key and primary key given as arguments. Returns an error if the source is not an index.
 func (c *Cursor) ContinuePrimaryKey(key, primaryKey safejs.Value) error {
 	c.iterated = true
-	_, err := c.jsCursor.Call("continuePrimaryKey", key, primaryKey)
-	return tryAsDOMException(err)
+	_, err := call(c.jsCursor, "continuePrimaryKey", key, primaryKey)
+	return err
 }
 
 // Delete returns an AckRequest, and, in a separate thread, deletes the record at the cursor's position, without changing the cursor's position. This can be used to delete specific records.
 func (c *Cursor) Delete() (*AckRequest, error) {
-	reqValue, err := c.jsCursor.Call("delete")
+	reqValue, err := call(c.jsCursor, "delete")
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	req := wrapRequest(c.txn, reqValue)
 	return newAckRequest(req), nil
@@ -170,9 +170,9 @@ func (c *Cursor) Delete() (*AckRequest, error) {
 
 // Update returns a Request, and, in a separate thread, updates the value at the current position of the cursor in the object store. This can be used to update specific records.
 func (c *Cursor) Update(value safejs.Value) (*Request, error) {
-	reqValue, err := c.jsCursor.Call("update", value)
+	reqValue, err := call(c.jsCursor, "update", value)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return wrapRequest(c.txn, reqValue), nil
 }

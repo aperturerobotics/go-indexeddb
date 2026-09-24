@@ -75,12 +75,13 @@ This will compile the tests to WebAssembly and run them in a headless browser en
 ## Transactions Expiring
 
 IndexedDB transactions automatically commit when all outstanding requests have
-been satisfied. When a Goroutine is suspended due to a select statement or other
-context switching, the IndexedDB transation commits automatically, leading to
-errors with a suffix "The transaction has finished."
+been satisfied. When a goroutine yields to the JavaScript event loop, for
+example in a select statement, the transaction commits automatically and the
+next request fails with a `TransactionInactiveError`.
 
-`RetryTxn` automatically re-creates the transaction and retries the operation
-whenever we encounter this specific error. This ensures that operations can
+`RetryTxn` and `durable.DurableTransaction` re-create the transaction and retry
+the operation on that error, which `IsTxnFinishedErr` detects by its
+DOMException name in every browser. This ensures that operations can
 continue even if the transaction has been automatically committed.
 
 When a transaction becomes inactive it will also commit the changes made up to

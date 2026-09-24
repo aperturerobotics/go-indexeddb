@@ -45,7 +45,7 @@ func newOpenDBRequest(ctx context.Context, req *Request, upgrader Upgrader) (*Op
 	}
 	_, err = req.jsRequest.Call(addEventListener, "upgradeneeded", upgrade)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	go func() {
 		<-ctx.Done()
@@ -75,7 +75,7 @@ func openDBListenSuccess(req *Request) error {
 		return err
 	}
 	_, err = jsDB.Call(addEventListener, "versionchange", versionChange)
-	return tryAsDOMException(err)
+	return err
 }
 
 func openDBUpgradeNeeded(req *Request, upgrader Upgrader, args []safejs.Value) error {

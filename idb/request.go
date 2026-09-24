@@ -6,9 +6,7 @@ package idb
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log"
-	"syscall/js"
 
 	"github.com/hack-pad/safejs"
 )
@@ -196,7 +194,7 @@ func (r *Request) listen(ctx context.Context, success, failed func()) error {
 		}
 		_, err = r.jsRequest.Call(addEventListener, "error", errFunc)
 		if err != nil {
-			return tryAsDOMException(err)
+			return err
 		}
 		go func() {
 			<-ctx.Done()
@@ -219,7 +217,7 @@ func (r *Request) listen(ctx context.Context, success, failed func()) error {
 		}
 		_, err = r.jsRequest.Call(addEventListener, "success", successFunc)
 		if err != nil {
-			return tryAsDOMException(err)
+			return err
 		}
 		go func() {
 			<-ctx.Done()
@@ -234,23 +232,9 @@ func (r *Request) listen(ctx context.Context, success, failed func()) error {
 }
 
 func catchHandler(fn func(err error)) {
-	err := recoveryToError(recover())
+	err := thrownError(recover())
 	if err != nil {
 		fn(err)
-	}
-}
-
-func recoveryToError(r interface{}) error {
-	if r == nil {
-		return nil
-	}
-	switch val := r.(type) {
-	case error:
-		return val
-	case js.Value:
-		return js.Error{Value: val}
-	default:
-		return fmt.Errorf("%+v", val)
 	}
 }
 

@@ -76,7 +76,7 @@ func (t *DurableTransaction) Abort() (bool, error) {
 	if err == nil {
 		return true, nil
 	}
-	if idb.IsTxnFinishedErr(err) {
+	if idb.IsTxnEndedErr(err) {
 		return false, nil
 	}
 	return false, err
@@ -92,7 +92,7 @@ func (t *DurableTransaction) Commit() error {
 
 	err := t.txn.Commit()
 	t.txn = nil
-	if idb.IsTxnFinishedErr(err) {
+	if idb.IsTxnEndedErr(err) {
 		err = nil
 	}
 	return err

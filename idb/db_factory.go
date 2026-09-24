@@ -62,9 +62,9 @@ func (f *Factory) Open(upgradeCtx context.Context, name string, version uint, up
 	if version > 0 {
 		args = append(args, version)
 	}
-	reqValue, err := f.jsFactory.Call("open", args...)
+	reqValue, err := call(f.jsFactory, "open", args...)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	req := wrapRequest(nil, reqValue)
 	return newOpenDBRequest(upgradeCtx, req, upgrader)
@@ -72,9 +72,9 @@ func (f *Factory) Open(upgradeCtx context.Context, name string, version uint, up
 
 // DeleteDatabase requests the deletion of a database.
 func (f *Factory) DeleteDatabase(name string) (*AckRequest, error) {
-	reqValue, err := f.jsFactory.Call("deleteDatabase", name)
+	reqValue, err := call(f.jsFactory, "deleteDatabase", name)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	req := wrapRequest(nil, reqValue)
 	return newAckRequest(req), nil
@@ -82,9 +82,9 @@ func (f *Factory) DeleteDatabase(name string) (*AckRequest, error) {
 
 // CompareKeys compares two keys and returns a result indicating which one is greater in value.
 func (f *Factory) CompareKeys(a, b js.Value) (int, error) {
-	compare, err := f.jsFactory.Call("cmp", a, b)
+	compare, err := call(f.jsFactory, "cmp", a, b)
 	if err != nil {
-		return 0, tryAsDOMException(err)
+		return 0, err
 	}
 	return compare.Int()
 }

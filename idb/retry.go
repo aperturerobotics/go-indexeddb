@@ -5,16 +5,16 @@ package idb
 
 import (
 	"context"
-	"strings"
+	"errors"
 )
 
 /*
 RetryTxn retries the function with a new transaction if the txn finishes prematurely.
 
 IndexedDB transactions automatically commit when all outstanding requests have
-been satisfied. When a Goroutine is suspended due to a select statement or other
-context switching, the IndexedDB transation commits automatically, leading to
-errors with a suffix "The transaction has finished."
+been satisfied. When a goroutine yields to the JavaScript event loop, for
+example in a select statement, the transaction commits automatically and the
+next request fails with a TransactionInactiveError.
 
 See: https://github.com/w3c/IndexedDB/issues/34 for more details.
 
@@ -34,9 +34,6 @@ func RetryTxn(
 	for {
 		txn, err := db.Transaction(txnMode, objectStoreName, objectStoreNames...)
 		if err != nil {
-			if IsTxnFinishedErr(err) {
-				continue
-			}
 			return err
 		}
 
@@ -56,7 +53,7 @@ func RetryTxn(
 
 		// commit the txn
 		err = txn.Commit()
-		if IsTxnFinishedErr(err) {
+		if IsTxnEndedErr(err) {
 			// txn committed automatically already
 			err = nil
 		}
@@ -65,22 +62,20 @@ func RetryTxn(
 	}
 }
 
-// IsTxnFinishedErr checks if an error corresponds to a transaction finishing.
-// see RetryTxn for details
+var (
+	errTransactionInactive = NewDOMException("TransactionInactiveError")
+	errInvalidState        = NewDOMException("InvalidStateError")
+)
+
+// IsTxnFinishedErr reports whether err is a request placed against a
+// transaction that is no longer active, such as one that committed
+// automatically. See RetryTxn for details.
 func IsTxnFinishedErr(err error) bool {
-	if err == nil {
-		return false
-	}
-	errStr := err.Error()
-	switch {
-	case strings.HasSuffix(errStr, "The transaction has finished."):
-		return true
-	case strings.HasSuffix(errStr, "The database connection is closing."):
-		return true
-	// Firefox: transaction finished error.
-	case strings.HasSuffix(errStr, "A request was placed against a transaction which is currently not active, or which is finished."):
-		return true
-	default:
-		return false
-	}
+	return errors.Is(err, errTransactionInactive)
+}
+
+// IsTxnEndedErr reports whether err is a Commit or Abort call rejected because
+// the transaction already committed or aborted.
+func IsTxnEndedErr(err error) bool {
+	return errors.Is(err, errInvalidState)
 }

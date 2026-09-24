@@ -46,7 +46,7 @@ func TestRetryTxn(t *testing.T) {
 			_, err = store.PutKey(safejs.Safe(js.ValueOf("key")), safejs.Safe(js.ValueOf("some value")))
 			assert.NoError(t, err)
 			if callCount == 1 {
-				return errors.New("The transaction has finished.")
+				return NewDOMException("TransactionInactiveError")
 			}
 			return nil
 		}, storeName)
@@ -68,5 +68,8 @@ func TestIsTxnFinishedErr(t *testing.T) {
 	t.Parallel()
 	assert.Equal(t, false, IsTxnFinishedErr(nil))
 	assert.Equal(t, false, IsTxnFinishedErr(errors.New("some error")))
-	assert.Equal(t, true, IsTxnFinishedErr(errors.New("The transaction has finished.")))
+	assert.Equal(t, false, IsTxnFinishedErr(errors.New("The transaction has finished.")))
+	assert.Equal(t, true, IsTxnFinishedErr(NewDOMException("TransactionInactiveError")))
+	assert.Equal(t, false, IsTxnFinishedErr(NewDOMException("InvalidStateError")))
+	assert.Equal(t, true, IsTxnEndedErr(NewDOMException("InvalidStateError")))
 }

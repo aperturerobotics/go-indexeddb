@@ -66,9 +66,9 @@ func (o *ObjectStore) AutoIncrement() (bool, error) {
 
 // Add returns an AckRequest, and, in a separate thread, creates a structured clone of the value, and stores the cloned value in the object store. This is for adding new records to an object store.
 func (o *ObjectStore) Add(value safejs.Value) (*AckRequest, error) {
-	reqValue, err := o.base.jsObjectStore.Call("add", value)
+	reqValue, err := call(o.base.jsObjectStore, "add", value)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	req := wrapRequest(o.base.txn, reqValue)
 	return newAckRequest(req), nil
@@ -76,9 +76,9 @@ func (o *ObjectStore) Add(value safejs.Value) (*AckRequest, error) {
 
 // AddKey is the same as Add, but includes the key to use to identify the record.
 func (o *ObjectStore) AddKey(key, value safejs.Value) (*AckRequest, error) {
-	reqValue, err := o.base.jsObjectStore.Call("add", value, key)
+	reqValue, err := call(o.base.jsObjectStore, "add", value, key)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	req := wrapRequest(o.base.txn, reqValue)
 	return newAckRequest(req), nil
@@ -86,9 +86,9 @@ func (o *ObjectStore) AddKey(key, value safejs.Value) (*AckRequest, error) {
 
 // Clear returns an AckRequest, then clears this object store in a separate thread. This is for deleting all current records out of an object store.
 func (o *ObjectStore) Clear() (*AckRequest, error) {
-	reqValue, err := o.base.jsObjectStore.Call("clear")
+	reqValue, err := call(o.base.jsObjectStore, "clear")
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	req := wrapRequest(o.base.txn, reqValue)
 	return newAckRequest(req), nil
@@ -111,21 +111,21 @@ func (o *ObjectStore) CountRange(keyRange *KeyRange) (*UintRequest, error) {
 
 // CreateIndex creates a new index during a version upgrade, returning a new Index object in the connected database.
 func (o *ObjectStore) CreateIndex(name string, keyPath safejs.Value, options IndexOptions) (*Index, error) {
-	jsIndex, err := o.base.jsObjectStore.Call("createIndex", name, keyPath, map[string]interface{}{
+	jsIndex, err := call(o.base.jsObjectStore, "createIndex", name, keyPath, map[string]interface{}{
 		"unique":     options.Unique,
 		"multiEntry": options.MultiEntry,
 	})
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return wrapIndex(o.base.txn, jsIndex), nil
 }
 
 // Delete returns an AckRequest, and, in a separate thread, deletes the store object selected by the specified key. This is for deleting individual records out of an object store.
 func (o *ObjectStore) Delete(key safejs.Value) (*AckRequest, error) {
-	reqValue, err := o.base.jsObjectStore.Call("delete", key)
+	reqValue, err := call(o.base.jsObjectStore, "delete", key)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	req := wrapRequest(o.base.txn, reqValue)
 	return newAckRequest(req), nil
@@ -133,8 +133,8 @@ func (o *ObjectStore) Delete(key safejs.Value) (*AckRequest, error) {
 
 // DeleteIndex destroys the specified index in the connected database, used during a version upgrade.
 func (o *ObjectStore) DeleteIndex(name string) error {
-	_, err := o.base.jsObjectStore.Call("deleteIndex", name)
-	return tryAsDOMException(err)
+	_, err := call(o.base.jsObjectStore, "deleteIndex", name)
+	return err
 }
 
 // GetAllKeys returns an ArrayRequest that retrieves record keys for all objects in the object store.
@@ -159,27 +159,27 @@ func (o *ObjectStore) GetKey(value safejs.Value) (*Request, error) {
 
 // Index opens an index from this object store after which it can, for example, be used to return a sequence of records sorted by that index using a cursor.
 func (o *ObjectStore) Index(name string) (*Index, error) {
-	jsIndex, err := o.base.jsObjectStore.Call("index", name)
+	jsIndex, err := call(o.base.jsObjectStore, "index", name)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return wrapIndex(o.base.txn, jsIndex), nil
 }
 
 // Put returns a Request, and, in a separate thread, creates a structured clone of the value, and stores the cloned value in the object store. This is for updating existing records in an object store when the transaction's mode is readwrite.
 func (o *ObjectStore) Put(value safejs.Value) (*Request, error) {
-	reqValue, err := o.base.jsObjectStore.Call("put", value)
+	reqValue, err := call(o.base.jsObjectStore, "put", value)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return wrapRequest(o.base.txn, reqValue), nil
 }
 
 // PutKey is the same as Put, but includes the key to use to identify the record.
 func (o *ObjectStore) PutKey(key, value safejs.Value) (*Request, error) {
-	reqValue, err := o.base.jsObjectStore.Call("put", value, key)
+	reqValue, err := call(o.base.jsObjectStore, "put", value, key)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return wrapRequest(o.base.txn, reqValue), nil
 }

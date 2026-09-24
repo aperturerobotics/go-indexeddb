@@ -48,26 +48,26 @@ func (db *Database) ObjectStoreNames() ([]string, error) {
 
 // CreateObjectStore creates and returns a new object store or index.
 func (db *Database) CreateObjectStore(name string, options ObjectStoreOptions) (*ObjectStore, error) {
-	jsObjectStore, err := db.jsDB.Call("createObjectStore", name, map[string]interface{}{
+	jsObjectStore, err := call(db.jsDB, "createObjectStore", name, map[string]interface{}{
 		"autoIncrement": options.AutoIncrement,
 		"keyPath":       options.KeyPath,
 	})
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return wrapObjectStore(nil, jsObjectStore), nil
 }
 
 // DeleteObjectStore destroys the object store with the given name in the connected database, along with any indexes that reference it.
 func (db *Database) DeleteObjectStore(name string) error {
-	_, err := db.jsDB.Call("deleteObjectStore", name)
-	return tryAsDOMException(err)
+	_, err := call(db.jsDB, "deleteObjectStore", name)
+	return err
 }
 
 // Close closes the connection to a database.
 func (db *Database) Close() error {
-	_, err := db.jsDB.Call("close")
-	return tryAsDOMException(err)
+	_, err := call(db.jsDB, "close")
+	return err
 }
 
 // Transaction returns a transaction object containing the Transaction.ObjectStore() method, which you can use to access your object store.
@@ -95,9 +95,9 @@ func (db *Database) TransactionWithOptions(options TransactionOptions, objectSto
 		args = append(args, optionsMap)
 	}
 
-	jsTxn, err := db.jsDB.Call("transaction", args...)
+	jsTxn, err := call(db.jsDB, "transaction", args...)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return wrapTransaction(db, jsTxn), nil
 }

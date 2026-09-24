@@ -28,9 +28,9 @@ func NewKeyRangeBound(lower, upper safejs.Value, lowerOpen, upperOpen bool) (*Ke
 	if err != nil {
 		return nil, err
 	}
-	keyRange, err := jsIDBKeyRange.Call("bound", lower, upper, lowerOpen, upperOpen)
+	keyRange, err := call(jsIDBKeyRange, "bound", lower, upper, lowerOpen, upperOpen)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return WrapKeyRange(keyRange), nil
 }
@@ -41,9 +41,9 @@ func NewKeyRangeLowerBound(lower safejs.Value, open bool) (*KeyRange, error) {
 	if err != nil {
 		return nil, err
 	}
-	keyRange, err := jsIDBKeyRange.Call("lowerBound", lower, open)
+	keyRange, err := call(jsIDBKeyRange, "lowerBound", lower, open)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return WrapKeyRange(keyRange), nil
 }
@@ -54,9 +54,9 @@ func NewKeyRangeUpperBound(upper safejs.Value, open bool) (*KeyRange, error) {
 	if err != nil {
 		return nil, err
 	}
-	keyRange, err := jsIDBKeyRange.Call("upperBound", upper, open)
+	keyRange, err := call(jsIDBKeyRange, "upperBound", upper, open)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return WrapKeyRange(keyRange), nil
 }
@@ -67,9 +67,9 @@ func NewKeyRangeOnly(only safejs.Value) (*KeyRange, error) {
 	if err != nil {
 		return nil, err
 	}
-	keyRange, err := jsIDBKeyRange.Call("only", only)
+	keyRange, err := call(jsIDBKeyRange, "only", only)
 	if err != nil {
-		return nil, tryAsDOMException(err)
+		return nil, err
 	}
 	return WrapKeyRange(keyRange), nil
 }
@@ -106,9 +106,9 @@ func (k *KeyRange) UpperOpen() (bool, error) {
 
 // Includes returns a boolean indicating whether a specified key is inside the key range.
 func (k *KeyRange) Includes(key safejs.Value) (bool, error) {
-	includes, err := k.jsKeyRange.Call("includes", key)
+	includes, err := call(k.jsKeyRange, "includes", key)
 	if err != nil {
-		return false, tryAsDOMException(err)
+		return false, err
 	}
 	return includes.Bool()
 }

@@ -4,7 +4,6 @@
 package idb
 
 import (
-	"syscall/js"
 	"testing"
 
 	"github.com/aperturerobotics/go-indexeddb/idb/internal/assert"
@@ -21,15 +20,20 @@ func init() {
 	}
 }
 
-func TestTryAsDOMException(t *testing.T) {
+func TestCallReturnsDOMException(t *testing.T) {
 	t.Parallel()
-	exceptionJS, err := domException.New("message", "name")
+	thrower, err := safejs.Global().Get("Function")
 	assert.NoError(t, err)
-	exception := js.Error{Value: safejs.Unsafe(exceptionJS)}
+	makeThrower, err := thrower.New(`return { run() { throw new DOMException("message", "name") } }`)
+	assert.NoError(t, err)
+	obj, err := makeThrower.Invoke()
+	assert.NoError(t, err)
+
+	_, err = call(obj, "run")
 	assert.Equal(t, DOMException{
 		name:    "name",
 		message: "message",
-	}, tryAsDOMException(exception))
+	}, err)
 }
 
 func TestDOMExceptionAsError(t *testing.T) {

@@ -61,6 +61,19 @@ func TestDurableTransaction(t *testing.T) {
 		t.Errorf("got %v, want %v", got, want)
 	}
 
+	// Let the transaction commit automatically, as it does whenever a goroutine
+	// yields to the event loop. The next request must retry on a new one.
+	if err := dt.txn.Await(ctx); err != nil {
+		t.Fatal(err)
+	}
+	got, err = store.Get(ctx, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !got.Equal(want) {
+		t.Errorf("after auto-commit got %v, want %v", got, want)
+	}
+
 	// Update the item
 	item = safejs.Safe(js.ValueOf("baz"))
 	if err := store.PutKey(ctx, key, item); err != nil {
